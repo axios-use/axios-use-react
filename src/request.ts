@@ -1,4 +1,4 @@
-import axios, {AxiosRequestConfig, AxiosError, Canceler} from 'axios';
+import axios, { AxiosRequestConfig, AxiosError, Canceler } from "axios";
 
 export type Arguments<T> = T extends (...args: infer A) => any ? A : never;
 
@@ -10,7 +10,7 @@ export interface Request {
   (...args: any[]): Resource<any>;
 }
 
-export type Payload<TRequest extends Request> = ReturnType<TRequest>['payload'];
+export type Payload<TRequest extends Request> = ReturnType<TRequest>["payload"];
 
 export interface RequestFactory<TRequest extends Request> {
   (...args: Arguments<TRequest>): {

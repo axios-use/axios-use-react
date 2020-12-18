@@ -1,5 +1,5 @@
-import {createContext} from 'react';
-import {AxiosInstance} from 'axios';
+import { createContext } from "react";
+import { AxiosInstance } from "axios";
 
 export const RequestContext = createContext<AxiosInstance | null>(null);
 export const RequestProvider = RequestContext.Provider;

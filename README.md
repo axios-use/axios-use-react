@@ -43,40 +43,41 @@ npm install --save react-request-hook axios
 ## Quick Start
 
 ```jsx
-import {RequestProvider} from 'react-request-hook';
-import axios from 'axios';
+import { RequestProvider } from "react-request-hook";
+import axios from "axios";
 
 // More info about configuration: https://github.com/axios/axios#axioscreateconfig
 const axiosInstance = axios.create({
-  baseURL: 'https://example.com/',
+  baseURL: "https://example.com/",
 });
 
 ReactDOM.render(
   <RequestProvider value={axiosInstance}>
     <App />
   </RequestProvider>,
-  document.getElementById('root'),
+  document.getElementById("root"),
 );
 ```
 
 ```jsx
 // User Profile component
 function UserProfile(props) {
-  const [profile, getProfile] = useResource(id => ({
+  const [profile, getProfile] = useResource((id) => ({
     url: `/user/${id}`,
-    method: 'GET'
-  }))
+    method: "GET",
+  }));
 
-  useEffect(() => getProfile(props.userId), [])
+  useEffect(() => getProfile(props.userId), []);
 
-  if(profile.isLoading) return <Spinner />
+  if (profile.isLoading) return <Spinner />;
 
   return (
     <ProfileScreen
       avatar={profile.data.avatar}
       email={profile.data.email}
-      name={profile.data.name} />
-  )
+      name={profile.data.name}
+    />
+  );
 }
 ```
 
@@ -89,9 +90,9 @@ The `useResource` hook manages the request state under the hood. Its high-level 
 It requires a function as the first argument that is just a [request config][axios-request-config] factory and returns a tuple with the resource state and a function to trigger the request call, which accepts the same arguments as the factory one.
 
 ```tsx
-const [comments, getComments] = useResource(id => ({
+const [comments, getComments] = useResource((id) => ({
   url: `/post/${id}/comments`,
-  method: 'get',
+  method: "get",
 }));
 ```
 
@@ -126,7 +127,7 @@ The request can also be triggered passing its arguments as dependencies to the _
 const [comments] = useResource(
   (id: string) => ({
     url: `/post/${id}/comments`,
-    method: 'get',
+    method: "get",
   }),
   [props.postId],
 );
@@ -145,7 +146,7 @@ It accepts the same function signature as `useResource` (a function that returns
 ```tsx
 const [request, createRequest] = useRequest((id: string) => ({
   url: `/post/${id}/comments`,
-  method: 'get',
+  method: "get",
 }));
 ```
 
@@ -172,10 +173,10 @@ By using it, you're responsible for handling the promise resolution. It's still 
 
 ```tsx
 useEffect(() => {
-  const {ready, cancel} = createRequest(props.postId);
+  const { ready, cancel } = createRequest(props.postId);
   ready()
     .then(setState)
-    .catch(error => {
+    .catch((error) => {
       if (error.isCancel === false) {
         setError(error);
       }
@@ -192,15 +193,15 @@ The `request` function allows you to define the response type coming from it. It
 const api = {
   getUsers: () => {
     return request<Users>({
-      url: '/users',
-      method: 'GET',
+      url: "/users",
+      method: "GET",
     });
   },
 
   getUserPosts: (userId: string) => {
     return request<Posts>({
       url: `/users/${userId}/posts`,
-      method: 'GET',
+      method: "GET",
     });
   },
 };
@@ -215,7 +216,7 @@ interface RequestError {
   // same as `response.data`, where response is the object coming from the axios promise
   data: Payload<Request>;
 
-  message: Error['message'];
+  message: Error["message"];
 
   // code on the `data` field, `error.code` or `error.response.status`
   // in the order
