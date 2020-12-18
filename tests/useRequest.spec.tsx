@@ -1,17 +1,17 @@
-import * as React from 'react';
-import {wait, act, cleanup, render} from 'react-testing-library';
-import {RequestProvider, RequestContext} from '../requestContext';
-import {useRequest, UseRequestResult} from '../useRequest';
-import {adapter} from '../../test-utils';
-import {Request} from '../request';
+import * as React from "react";
+import { wait, act, cleanup, render } from "react-testing-library";
+import { RequestProvider, RequestContext } from "../src/requestContext";
+import { useRequest, UseRequestResult } from "../src/useRequest";
+import { adapter } from "./utils";
+import { Request } from "../src/request";
 
-describe('useRequest', () => {
+describe("useRequest", () => {
   const axios = adapter.axiosInstance;
   const onCancel = jest.fn();
 
   axios.interceptors.response.use(
-    config => config,
-    error => {
+    (config) => config,
+    (error) => {
       if (axios.isCancel(error)) {
         onCancel(error);
       }
@@ -28,12 +28,12 @@ describe('useRequest', () => {
   afterEach(cleanup);
 
   function setup(fn?: Request | null) {
-    const hook = {response: {}} as {
+    const hook = { response: {} } as {
       response: UseRequestResult<any>[0];
       request: UseRequestResult<any>[1];
     };
 
-    const defaultRequest = fn ? fn : () => ({url: '/users', method: 'GET'});
+    const defaultRequest = fn ? fn : () => ({ url: "/users", method: "GET" });
 
     const Component = () => {
       const [response, request] = useRequest(defaultRequest);
@@ -48,13 +48,13 @@ describe('useRequest', () => {
       </RequestProvider>,
     );
 
-    return {hook, ...rendered};
+    return { hook, ...rendered };
   }
 
-  it('should call the axios instance when it is ready to make the request', async () => {
-    adapter.onGet('/users').reply(200, []);
-    const source = jest.spyOn(axios.CancelToken, 'source');
-    const {hook} = setup();
+  it("should call the axios instance when it is ready to make the request", async () => {
+    adapter.onGet("/users").reply(200, []);
+    const source = jest.spyOn(axios.CancelToken, "source");
+    const { hook } = setup();
 
     let p;
     act(() => {
@@ -64,18 +64,18 @@ describe('useRequest', () => {
     expect(source).toHaveBeenCalledTimes(1);
     expect(axios).toHaveBeenCalledTimes(1);
     expect(axios).toHaveBeenCalledWith({
-      cancelToken: {promise: expect.any(Promise)},
-      url: '/users',
-      method: 'GET',
+      cancelToken: { promise: expect.any(Promise) },
+      url: "/users",
+      method: "GET",
     });
     await expect(p).resolves.toEqual([]);
     source.mockRestore();
   });
 
-  it('should update hasPending properly', async () => {
-    adapter.onGet('/users').reply(200, []);
+  it("should update hasPending properly", async () => {
+    adapter.onGet("/users").reply(200, []);
 
-    const {hook} = setup();
+    const { hook } = setup();
     act(() => {
       hook.request().ready();
       hook.request().ready();
@@ -94,59 +94,59 @@ describe('useRequest', () => {
     });
   });
 
-  it('should resolve with the response data', async () => {
-    adapter.onGet('/users').reply(200, [{id: '1', name: 'luke skywalker'}]);
-    const {hook} = setup();
+  it("should resolve with the response data", async () => {
+    adapter.onGet("/users").reply(200, [{ id: "1", name: "luke skywalker" }]);
+    const { hook } = setup();
 
     let p;
     act(() => {
       p = hook.request().ready();
     });
 
-    await expect(p).resolves.toEqual([{id: '1', name: 'luke skywalker'}]);
+    await expect(p).resolves.toEqual([{ id: "1", name: "luke skywalker" }]);
   });
 
-  it('should reject with a normalized error data', async () => {
-    adapter.onGet('/user/1').reply(404, {message: 'User not found'});
-    const {hook} = setup((id: string) => ({
+  it("should reject with a normalized error data", async () => {
+    adapter.onGet("/user/1").reply(404, { message: "User not found" });
+    const { hook } = setup((id: string) => ({
       url: `/user/${id}`,
-      method: 'get',
+      method: "get",
     }));
 
     let p;
     act(() => {
-      p = hook.request('1').ready();
+      p = hook.request("1").ready();
     });
 
     await expect(p).rejects.toEqual({
       code: 404,
-      data: {message: 'User not found'},
+      data: { message: "User not found" },
       isCancel: false,
-      message: 'Request failed with status code 404',
+      message: "Request failed with status code 404",
     });
   });
 
-  it('should cancel all pending requests when `clear` is called', async () => {
-    adapter.onGet('/users').reply(200, []);
+  it("should cancel all pending requests when `clear` is called", async () => {
+    adapter.onGet("/users").reply(200, []);
 
     let p1, p2, p3;
-    const {hook} = setup();
+    const { hook } = setup();
     act(() => {
-      const {ready} = hook.request();
+      const { ready } = hook.request();
       p1 = ready();
       p2 = ready();
       p3 = ready();
     });
 
     act(() => {
-      hook.response.clear('clear');
+      hook.response.clear("clear");
     });
 
     const error = {
       code: undefined,
       data: null,
       isCancel: true,
-      message: 'clear',
+      message: "clear",
     };
 
     await expect(p1).rejects.toEqual(error);
@@ -154,9 +154,9 @@ describe('useRequest', () => {
     await expect(p3).rejects.toEqual(error);
   });
 
-  it('should cancel the current request when calling a canceler', async () => {
-    adapter.onGet('/users').reply(200, []);
-    const {hook} = setup(null);
+  it("should cancel the current request when calling a canceler", async () => {
+    adapter.onGet("/users").reply(200, []);
+    const { hook } = setup(null);
 
     let p1, p2;
     act(() => {
@@ -164,23 +164,23 @@ describe('useRequest', () => {
       const r2 = hook.request();
       p1 = r1.ready();
       p2 = r2.ready();
-      r1.cancel('cancel');
+      r1.cancel("cancel");
     });
 
     await expect(p1).rejects.toEqual({
       code: undefined,
       data: null,
       isCancel: true,
-      message: 'cancel',
+      message: "cancel",
     });
 
     await expect(p2).resolves.toEqual([]);
   });
 
-  it('should cancel all requests created from the same factory when calling the canceler', async () => {
-    adapter.onGet('/users').reply(200, []);
+  it("should cancel all requests created from the same factory when calling the canceler", async () => {
+    adapter.onGet("/users").reply(200, []);
 
-    const {hook, unmount} = setup();
+    const { hook, unmount } = setup();
     const r1 = hook.request();
 
     let p1, p2;
@@ -190,14 +190,14 @@ describe('useRequest', () => {
 
     act(() => {
       p2 = r1.ready();
-      r1.cancel('cancel');
+      r1.cancel("cancel");
     });
 
     const error = {
       code: undefined,
       data: null,
       isCancel: true,
-      message: 'cancel',
+      message: "cancel",
     };
 
     unmount();
@@ -206,8 +206,8 @@ describe('useRequest', () => {
     await expect(p2).rejects.toEqual(error);
   });
 
-  it('should cancel pending requests on unmount', async () => {
-    const {hook, unmount} = setup();
+  it("should cancel pending requests on unmount", async () => {
+    const { hook, unmount } = setup();
 
     let p;
     act(() => {
@@ -224,13 +224,13 @@ describe('useRequest', () => {
     });
   });
 
-  it('uses the last returned axios config', async () => {
+  it("uses the last returned axios config", async () => {
     const Component = () => {
-      const [endpoint, setEndpoint] = React.useState('endpoint-1');
-      React.useEffect(() => setEndpoint('endpoint-2'), []);
+      const [endpoint, setEndpoint] = React.useState("endpoint-1");
+      React.useEffect(() => setEndpoint("endpoint-2"), []);
       const [, request] = useRequest(() => ({
         url: `/${endpoint}`,
-        method: 'get',
+        method: "get",
       }));
 
       React.useEffect(() => {
@@ -247,20 +247,20 @@ describe('useRequest', () => {
     );
 
     await wait(() => expect(adapter.history.get.length).toEqual(2));
-    expect(adapter.history.get[0].url).toEqual('/endpoint-1');
-    expect(adapter.history.get[1].url).toEqual('/endpoint-2');
+    expect(adapter.history.get[0].url).toEqual("/endpoint-1");
+    expect(adapter.history.get[1].url).toEqual("/endpoint-2");
   });
 
-  it('should use the lastest axios instance', async () => {
+  it("should use the lastest axios instance", async () => {
     const instance1 = adapter.axiosInstance.create({
-      baseURL: 'https://instance1',
+      baseURL: "https://instance1",
     });
 
     const instance2 = adapter.axiosInstance.create({
-      baseURL: 'https://instance2',
+      baseURL: "https://instance2",
     });
 
-    const Provider: React.FC = ({children}) => {
+    const Provider: React.FC = ({ children }) => {
       const [instance, setInstance] = React.useState(() => instance1);
       React.useEffect(() => setInstance(() => instance2), []);
       return <RequestProvider value={instance}>{children}</RequestProvider>;
@@ -270,8 +270,8 @@ describe('useRequest', () => {
     const Component = () => {
       const current = React.useContext(RequestContext);
       const [, request] = useRequest(() => ({
-        url: '/users',
-        method: 'get',
+        url: "/users",
+        method: "get",
       }));
 
       React.useEffect(() => {
@@ -287,12 +287,12 @@ describe('useRequest', () => {
     let countInstance1 = 0;
     let countInstance2 = 0;
 
-    instance1.interceptors.request.use(config => {
+    instance1.interceptors.request.use((config) => {
       countInstance1++;
       return config;
     });
 
-    instance2.interceptors.request.use(config => {
+    instance2.interceptors.request.use((config) => {
       countInstance2++;
       return config;
     });
@@ -310,10 +310,10 @@ describe('useRequest', () => {
     });
   });
 
-  it('throws if provider is missing', () => {
+  it("throws if provider is missing", () => {
     const Component = () => {
       expect(() => {
-        useRequest(() => ({url: ''}));
+        useRequest(() => ({ url: "" }));
       }).toThrow();
       return null;
     };

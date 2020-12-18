@@ -1,21 +1,21 @@
-import * as React from 'react';
-import {wait, act, render, cleanup} from 'react-testing-library';
-import {RequestProvider} from '../requestContext';
-import {useResource, UseResourceResult} from '../useResource';
-import {adapter} from '../../test-utils';
-import {Request, request} from '../request';
+import * as React from "react";
+import { wait, act, render, cleanup } from "react-testing-library";
+import { RequestProvider } from "../src/requestContext";
+import { useResource, UseResourceResult } from "../src/useResource";
+import { adapter } from "./utils";
+import { Request, request } from "../src/request";
 
-describe('useResource', () => {
+describe("useResource", () => {
   const axios = adapter.axiosInstance;
   const onRequestCancel = jest.fn();
 
-  const Provider: React.FC = ({children}) => (
+  const Provider: React.FC = ({ children }) => (
     <RequestProvider value={axios}>{children}</RequestProvider>
   );
 
   axios.interceptors.response.use(
-    config => config,
-    error => {
+    (config) => config,
+    (error) => {
       if (axios.isCancel(error)) {
         onRequestCancel(error);
       }
@@ -32,10 +32,10 @@ describe('useResource', () => {
   afterEach(cleanup);
 
   function setup(
-    fn: Request = () => request({url: '/users', method: 'GET'}),
+    fn: Request = () => request({ url: "/users", method: "GET" }),
     dependencies?: any[],
   ) {
-    const hook = {users: {}} as {
+    const hook = { users: {} } as {
       users: UseResourceResult<any>[0];
       getUsers: UseResourceResult<any>[1];
     };
@@ -53,47 +53,49 @@ describe('useResource', () => {
       </Provider>,
     );
 
-    return {hook, ...rendered};
+    return { hook, ...rendered };
   }
 
-  it('should make the request when the default params have been passed', async () => {
-    adapter.onGet('/users/userId').reply(200, {id: '1', name: 'luke'});
+  it("should make the request when the default params have been passed", async () => {
+    adapter.onGet("/users/userId").reply(200, { id: "1", name: "luke" });
 
-    const {hook} = setup(
-      (id: string) => ({url: `/users/${id}`, method: 'GET'}),
-      ['userId'],
+    const { hook } = setup(
+      (id: string) => ({ url: `/users/${id}`, method: "GET" }),
+      ["userId"],
     );
 
-    await wait(() => expect(hook.users.data).toEqual({id: '1', name: 'luke'}));
+    await wait(() =>
+      expect(hook.users.data).toEqual({ id: "1", name: "luke" }),
+    );
     expect(hook.users.isLoading).toEqual(false);
     expect(hook.users.error).toEqual(undefined);
     expect(hook.users.cancel).toEqual(expect.any(Function));
   });
 
-  it('should cancel a pending request on unmount', async () => {
-    adapter.onGet('/users').reply(200, []);
+  it("should cancel a pending request on unmount", async () => {
+    adapter.onGet("/users").reply(200, []);
 
-    const {hook, unmount} = setup();
+    const { hook, unmount } = setup();
     act(() => hook.getUsers());
     unmount();
 
     await wait(() => expect(onRequestCancel).toHaveBeenCalledTimes(1));
   });
 
-  it('should cancel last pending request when changing default params', async () => {
-    adapter.onGet('/users/1').reply(200, {id: '1', name: 'luke'});
-    adapter.onGet('/users/2').reply(200, {id: '2', name: 'vader'});
+  it("should cancel last pending request when changing default params", async () => {
+    adapter.onGet("/users/1").reply(200, { id: "1", name: "luke" });
+    adapter.onGet("/users/2").reply(200, { id: "2", name: "vader" });
 
     const onSuccess = jest.fn();
 
     const Component: React.FC = () => {
-      const [userId, setUserId] = React.useState('1');
+      const [userId, setUserId] = React.useState("1");
       const [users] = useResource(
-        (id: string) => ({method: 'GET', url: `/users/${id}`}),
+        (id: string) => ({ method: "GET", url: `/users/${id}` }),
         [userId],
       );
       React.useEffect(() => {
-        if (userId === '1') setUserId('2');
+        if (userId === "1") setUserId("2");
         if (users.data) onSuccess(users.data);
       }, [users, userId]);
       return null;
@@ -107,14 +109,14 @@ describe('useResource', () => {
 
     await wait(() => expect(onSuccess).toHaveBeenCalledTimes(1));
     expect(onSuccess).toHaveBeenCalledTimes(1);
-    expect(onSuccess).toHaveBeenCalledWith({id: '2', name: 'vader'});
+    expect(onSuccess).toHaveBeenCalledWith({ id: "2", name: "vader" });
     expect(onRequestCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('should allow only one request at time', async () => {
-    adapter.onGet('/users').reply(200, []);
+  it("should allow only one request at time", async () => {
+    adapter.onGet("/users").reply(200, []);
 
-    const {hook} = setup();
+    const { hook } = setup();
 
     act(() => {
       hook.getUsers();
@@ -129,10 +131,10 @@ describe('useResource', () => {
     expect(onRequestCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('should allow to cancel programmatically a request', async () => {
-    adapter.onGet('/users').reply(200, []);
+  it("should allow to cancel programmatically a request", async () => {
+    adapter.onGet("/users").reply(200, []);
 
-    const {hook} = setup();
+    const { hook } = setup();
 
     act(() => {
       hook.getUsers();
@@ -147,10 +149,10 @@ describe('useResource', () => {
     expect(hook.users.isLoading).toEqual(false);
   });
 
-  it('should return a error properly when it occurs', async () => {
-    adapter.onGet('/users').reply(500, {message: 'Internal Error'});
+  it("should return a error properly when it occurs", async () => {
+    adapter.onGet("/users").reply(500, { message: "Internal Error" });
 
-    const {hook} = setup();
+    const { hook } = setup();
 
     act(() => {
       hook.getUsers();
@@ -159,9 +161,9 @@ describe('useResource', () => {
     await wait(() =>
       expect(hook.users.error).toEqual({
         code: 500,
-        data: {message: 'Internal Error'},
+        data: { message: "Internal Error" },
         isCancel: false,
-        message: 'Request failed with status code 500',
+        message: "Request failed with status code 500",
       }),
     );
 
