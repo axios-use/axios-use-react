@@ -1,20 +1,11 @@
-<p align="center">
-  <img width="600" src="https://raw.githubusercontent.com/schettino/react-request-hook/master/other/react-request-hook.png">
-</p>
+# react-request-hook
 
 > Managed, cancelable and safely typed requests.
 
-<!-- prettier-ignore-start -->
-[![NPM][npm-badge]][npm]
-[![Build Status][build-badge]][build]
-[![Code Coverage][coverage-badge]][coverage]
-[![Bundle Size][bundle-size-badge]][bundle-size]
-[![PRs Welcome][prs-badge]][prs]
-[![MIT License][license-badge]][license]
+Fork: https://github.com/react-cmpt/react-request-hook
 
-[![Edit react-request-hook-examples](https://codesandbox.io/static/img/play-codesandbox.svg)][codesandbox]
-
-<!-- prettier-ignore-end -->
+[![npm](https://img.shields.io/npm/v/@react-cmpt/react-request-hook.svg)](https://www.npmjs.com/package/@react-cmpt/react-request-hook)
+[![GitHub license](https://img.shields.io/github/license/react-cmpt/react-request-hook)](https://github.com/react-cmpt/react-request-hook/blob/master/LICENSE)
 
 ## Table of Contents
 
@@ -26,24 +17,19 @@
   - [`request()`](#request)
   - [`createRequestError()`](#createrequesterror)
 - [Type safety for non typescript projects](#type-safety-for-non-typescript-projects)
-- [Examples](#examples)
-- [Acknowledgement](#acknowledgement)
 - [License](#license)
 
 ## Install
 
 ```bash
 # Yarn
-yarn add react-request-hook axios
-
-# NPM
-npm install --save react-request-hook axios
+yarn add axios @react-cmpt/react-request-hook
 ```
 
 ## Quick Start
 
 ```jsx
-import { RequestProvider } from "react-request-hook";
+import { RequestProvider } from "@react-cmpt/react-request-hook";
 import axios from "axios";
 
 // More info about configuration: https://github.com/axios/axios#axioscreateconfig
@@ -244,42 +230,6 @@ const api = {
 };
 ```
 
-And you'll have
-
-<p align="center">
-  <img width="600" src="https://raw.githubusercontent.com/schettino/react-request-hook/master/other/type-hint.png">
-</p>
-
-## Example
-
-You can try out react-request-hook right in your browser with the [Codesandbox example][codesandbox].
-
-The example folder contains a `/components` folder with different use cases, like infinite scrolling components, search input that triggers the API, and so on. It's currently a work in progress.
-
-## Acknowledgement
-
-Thanks to @kentcdodds for making this implementation a lot easier to test. [create-react-library](https://www.npmjs.com/package/create-react-library) for the initial setup and [Grommet](https://github.com/grommet/grommet) with its great components used in the examples.
-
 ## License
 
-MIT
-
-<!-- prettier-ignore-start -->
-
-[axios-request-config]: (https://github.com/axios/axios#request-config)
-[npm]: https://www.npmjs.com/package/react-request-hook
-[npm-badge]: https://img.shields.io/npm/v/react-request-hook.svg
-[node]: https://nodejs.org
-[build-badge]: https://img.shields.io/travis/schettino/react-request-hook.svg?style=flat-square
-[build]: https://travis-ci.org/schettino/react-request-hook
-[coverage-badge]: https://img.shields.io/codecov/c/github/schettino/react-request-hook.svg?style=flat-square
-[coverage]: https://codecov.io/github/schettino/react-request-hook
-[license-badge]: https://img.shields.io/npm/l/react-testing-library.svg?style=flat-square
-[license]: https://github.com/kentcdodds/react-testing-library/blob/master/LICENSE
-[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
-[prs]: http://makeapullrequest.com
-[bundle-size]: https://bundlephobia.com/result?p=react-request-hook@latest
-[bundle-size-badge]: https://badgen.net/bundlephobia/minzip/react-request-hook@latest
-[codesandbox]: https://codesandbox.io/s/github/schettino/react-request-hook-examples/tree/master/?fontsize=14&view=preview
-
-<!-- prettier-ignore-end -->
+[MIT](./LICENSE)
