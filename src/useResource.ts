@@ -2,13 +2,7 @@ import { useEffect, useCallback, useReducer, useMemo, useState } from "react";
 import isEqual from "fast-deep-equal";
 import { Canceler } from "axios";
 import { useRequest } from "./useRequest";
-import {
-  Payload,
-  RequestError,
-  Request,
-  RequestDispatcher,
-  Arguments,
-} from "./request";
+import { Payload, RequestError, Request, RequestDispatcher } from "./request";
 
 import { useMountedState } from "./utils";
 
@@ -44,7 +38,7 @@ function getNextState(
 
 export function useResource<TRequest extends Request>(
   fn: TRequest,
-  defaultParams?: Arguments<TRequest>,
+  defaultParams?: Parameters<TRequest>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
   const [{ clear }, createRequest] = useRequest(fn);
@@ -55,9 +49,11 @@ export function useResource<TRequest extends Request>(
   const [requestParams, setRequestParams] = useState(defaultParams);
 
   const request = useCallback(
-    (...args: Arguments<TRequest> | any[]) => {
+    (...args: Parameters<TRequest> | any[]) => {
       clear(REQUEST_CLEAR_MESSAGE);
-      const { ready, cancel } = createRequest(...(args as Arguments<TRequest>));
+      const { ready, cancel } = createRequest(
+        ...(args as Parameters<TRequest>),
+      );
 
       if (getMountedState()) {
         (async function flow() {

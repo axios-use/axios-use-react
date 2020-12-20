@@ -5,12 +5,7 @@ import axios, {
   Canceler,
   CancelToken,
 } from "axios";
-import {
-  createRequestError,
-  RequestFactory,
-  Request,
-  Arguments,
-} from "./request";
+import { createRequestError, RequestFactory, Request } from "./request";
 import { RequestContext } from "./requestContext";
 
 import { useMountedState } from "./utils";
@@ -58,7 +53,7 @@ export function useRequest<TRequest extends Request>(
   }, [fn]);
 
   const request = useCallback(
-    (...args: Arguments<TRequest> | any[]) => {
+    (...args: Parameters<TRequest> | any[]) => {
       const config = callFn.current(...args);
       const source = axios.CancelToken.source();
 

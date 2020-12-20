@@ -1,7 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosError, Canceler } from "axios";
 
-export type Arguments<T> = T extends (...args: infer A) => any ? A : never;
-
 export interface Resource<TPayload> extends AxiosRequestConfig {
   payload?: TPayload;
 }
@@ -13,14 +11,14 @@ export interface Request {
 export type Payload<TRequest extends Request> = ReturnType<TRequest>["payload"];
 
 export interface RequestFactory<TRequest extends Request> {
-  (...args: Arguments<TRequest>): {
+  (...args: Parameters<TRequest>): {
     cancel: Canceler;
     ready: () => Promise<Payload<TRequest>>;
   };
 }
 
 export interface RequestDispatcher<TRequest extends Request> {
-  (...args: Arguments<TRequest>): Canceler;
+  (...args: Parameters<TRequest>): Canceler;
 }
 
 // Normalize the error response returned from our hooks
