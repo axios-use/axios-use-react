@@ -1,4 +1,11 @@
-import { useEffect, useCallback, useReducer, useMemo, useState } from "react";
+import {
+  useEffect,
+  useCallback,
+  useReducer,
+  useMemo,
+  useState,
+  useRef,
+} from "react";
 import isEqual from "fast-deep-equal";
 import { Canceler } from "axios";
 import { useRequest } from "./useRequest";
@@ -75,6 +82,11 @@ export function useResource<TRequest extends Request>(
     [clear, createRequest, getMountedState],
   );
 
+  const requestRefFn = useRef(request);
+  useEffect(() => {
+    requestRefFn.current = request;
+  }, [request]);
+
   useEffect(() => {
     // The array of default request params is a dependency that we pass directly
     // as a dependency to this useEffect, which will run on the initial render
@@ -96,7 +108,7 @@ export function useResource<TRequest extends Request>(
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     let canceller: Canceler = () => {};
     if (requestParams) {
-      canceller = request(...requestParams);
+      canceller = requestRefFn.current(...requestParams);
     }
     return canceller;
   }, [requestParams]);
