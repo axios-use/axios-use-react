@@ -30,6 +30,7 @@ function getNextState(
   action: Action,
 ): RequestState<any> {
   return {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data: action.type === "success" ? action.data : state.data,
     error: action.type === "error" ? action.error : undefined,
     isLoading: action.type === "start" ? true : false,
@@ -56,21 +57,22 @@ export function useResource<TRequest extends Request>(
       );
 
       if (getMountedState()) {
-        (async function flow() {
+        void (async function flow() {
           try {
             dispatch({ type: "start" });
             const data = await ready();
             dispatch({ type: "success", data });
           } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (!error.isCancel && getMountedState())
-              dispatch({ type: "error", error });
+              dispatch({ type: "error", error: error as RequestError });
           }
         })();
       }
 
       return cancel;
     },
-    [createRequest],
+    [clear, createRequest, getMountedState],
   );
 
   useEffect(() => {
@@ -88,9 +90,10 @@ export function useResource<TRequest extends Request>(
         isEqual(current, defaultParams) ? current : defaultParams,
       );
     }
-  }, defaultParams);
+  }, [defaultParams, getMountedState]);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     let canceller: Canceler = () => {};
     if (requestParams) {
       canceller = request(...requestParams);
@@ -106,5 +109,5 @@ export function useResource<TRequest extends Request>(
 
     const result: UseResourceResult<TRequest> = [{ ...state, cancel }, request];
     return result;
-  }, [state, request]);
+  }, [state, request, getMountedState, clear]);
 }

@@ -39,13 +39,16 @@ export function useRequest<TRequest extends Request>(
   const [sources, setSources] = useState<CancelTokenSource[]>([]);
   const mountedRef = useRef(true);
 
-  const removeCancelToken = (cancelToken: CancelToken) => {
-    if (mountedRef.current && getMountedState()) {
-      setSources((prevSources) =>
-        prevSources.filter((source) => source.token !== cancelToken),
-      );
-    }
-  };
+  const removeCancelToken = useCallback(
+    (cancelToken: CancelToken) => {
+      if (mountedRef.current && getMountedState()) {
+        setSources((prevSources) =>
+          prevSources.filter((source) => source.token !== cancelToken),
+        );
+      }
+    },
+    [getMountedState],
+  );
 
   const callFn = useRef(fn);
   useEffect(() => {
@@ -64,6 +67,7 @@ export function useRequest<TRequest extends Request>(
         return axiosInstance({ ...config, cancelToken: source.token })
           .then((response) => {
             removeCancelToken(source.token);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return response.data;
           })
           .catch((error: AxiosError) => {
@@ -77,7 +81,7 @@ export function useRequest<TRequest extends Request>(
         cancel: source.cancel,
       };
     },
-    [axiosInstance],
+    [axiosInstance, getMountedState, removeCancelToken],
   );
 
   const clear = useCallback(
@@ -90,7 +94,7 @@ export function useRequest<TRequest extends Request>(
         }
       }
     },
-    [sources],
+    [getMountedState, sources],
   );
 
   const clearRef = useRef(clear);
