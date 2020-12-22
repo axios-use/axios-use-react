@@ -1,9 +1,8 @@
 {
   "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
   "rootDir": ".",
-  "transform": {
-    "^.+\\.tsx?$": "ts-jest"
-  },
+  "preset": "ts-jest",
+  "testEnvironment": "node",
   "globals": {
     "ts-jest": {
       "tsconfig": "tsconfig.test.json"

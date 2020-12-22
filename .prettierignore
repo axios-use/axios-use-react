@@ -6,6 +6,7 @@ node_modules
 /dist
 /lib
 /esm
+coverage
 
 LICENSE
 CHANGELOG.md
