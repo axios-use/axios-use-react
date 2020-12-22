@@ -9,9 +9,7 @@ export interface Resource<TPayload> extends AxiosRequestConfig {
   payload?: TPayload;
 }
 
-export interface Request {
-  (...args: any[]): Resource<any>;
-}
+export type Request<T = any> = (...args: any[]) => Resource<T>;
 
 export type Payload<TRequest extends Request> = ReturnType<TRequest>["payload"];
 

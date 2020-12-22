@@ -1,24 +1,16 @@
-import {
-  useEffect,
-  useCallback,
-  useReducer,
-  useMemo,
-  useState,
-  useRef,
-} from "react";
-import isEqual from "fast-deep-equal";
+import { useEffect, useCallback, useReducer, useMemo, useRef } from "react";
 import { Canceler } from "axios";
 import { useRequest } from "./useRequest";
 import { Payload, RequestError, Request, RequestDispatcher } from "./request";
 
-import { useMountedState } from "./utils";
+import { useDeepMemo, useMountedState } from "./utils";
 
 const REQUEST_CLEAR_MESSAGE =
   "A new request has been made before completing the last one";
 
 type RequestState<TRequest extends Request> = {
   data?: Payload<TRequest>;
-  error?: RequestError;
+  error?: RequestError<Payload<TRequest>>;
   isLoading: boolean;
 };
 
@@ -27,17 +19,16 @@ export type UseResourceResult<TRequest extends Request> = [
   RequestDispatcher<TRequest>,
 ];
 
-type Action =
-  | { type: "success"; data: any }
+type Action<T> =
+  | { type: "success"; data: T }
   | { type: "error"; error: RequestError }
   | { type: "reset" | "start" };
 
-function getNextState(
-  state: RequestState<any>,
-  action: Action,
-): RequestState<any> {
+function getNextState<TRequest extends Request>(
+  state: RequestState<TRequest>,
+  action: Action<Payload<TRequest>>,
+): RequestState<TRequest> {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data: action.type === "success" ? action.data : state.data,
     error: action.type === "error" ? action.error : undefined,
     isLoading: action.type === "start" ? true : false,
@@ -46,36 +37,31 @@ function getNextState(
 
 export function useResource<TRequest extends Request>(
   fn: TRequest,
-  defaultParams?: Parameters<TRequest>,
+  requestParams?: Parameters<TRequest>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
   const [{ clear }, createRequest] = useRequest(fn);
   const [state, dispatch] = useReducer(getNextState, {
-    isLoading: Boolean(defaultParams),
+    isLoading: Boolean(requestParams),
   });
 
-  const [requestParams, setRequestParams] = useState(defaultParams);
-
   const request = useCallback(
-    (...args: Parameters<TRequest> | any[]) => {
+    (...args: Parameters<TRequest>) => {
       clear(REQUEST_CLEAR_MESSAGE);
-      const { ready, cancel } = createRequest(
-        ...(args as Parameters<TRequest>),
-      );
+      const { ready, cancel } = createRequest(...args);
 
-      if (getMountedState()) {
-        void (async function flow() {
-          try {
-            dispatch({ type: "start" });
-            const data = await ready();
-            dispatch({ type: "success", data });
-          } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            if (!error.isCancel && getMountedState())
-              dispatch({ type: "error", error: error as RequestError });
+      void (async () => {
+        try {
+          getMountedState() && dispatch({ type: "start" });
+          const data = await ready();
+          getMountedState() && dispatch({ type: "success", data });
+        } catch (e) {
+          const error = e as RequestError<Payload<TRequest>>;
+          if (getMountedState() && !error.isCancel) {
+            dispatch({ type: "error", error });
           }
-        })();
-      }
+        }
+      })();
 
       return cancel;
     },
@@ -88,30 +74,14 @@ export function useResource<TRequest extends Request>(
   }, [request]);
 
   useEffect(() => {
-    // The array of default request params is a dependency that we pass directly
-    // as a dependency to this useEffect, which will run on the initial render
-    // and subsequent params updates, triggering new requests as the params change.
-    // If the dependency is not set, we avoid going down this road. Hooks should be
-    // either fully controlled or self-contained.
-    if (!defaultParams) return;
-
-    // We perform an deep equality check of the params and rely on React's bail out
-    // to control future request calls made passing default params as dependency
-    if (getMountedState()) {
-      setRequestParams((current) =>
-        isEqual(current, defaultParams) ? current : defaultParams,
-      );
-    }
-  }, [defaultParams, getMountedState]);
-
-  useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     let canceller: Canceler = () => {};
     if (requestParams) {
       canceller = requestRefFn.current(...requestParams);
     }
     return canceller;
-  }, [requestParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, useDeepMemo([requestParams]));
 
   return useMemo(() => {
     const cancel = (message?: string) => {
