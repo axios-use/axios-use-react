@@ -2,10 +2,10 @@
 
 > Managed, cancelable and safely typed requests.
 
-Fork: https://github.com/react-cmpt/react-request-hook
-
 [![npm](https://img.shields.io/npm/v/@react-cmpt/react-request-hook.svg)](https://www.npmjs.com/package/@react-cmpt/react-request-hook)
 [![GitHub license](https://img.shields.io/github/license/react-cmpt/react-request-hook)](https://github.com/react-cmpt/react-request-hook/blob/master/LICENSE)
+
+Fork: https://github.com/schettino/react-request-hook
 
 ## Table of Contents
 
