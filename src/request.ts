@@ -28,8 +28,9 @@ export interface RequestDispatcher<TRequest extends Request> {
 export interface RequestError<T> {
   data: T;
   message: string;
-  code?: string;
+  code?: string | number;
   isCancel: boolean;
+  original: AxiosError;
 }
 
 export function request<TPayload>(
@@ -46,16 +47,16 @@ export function request<TPayload>(
 export function createRequestError<T = any>(
   error: AxiosError,
 ): RequestError<T> {
-  const data = (error.response as AxiosResponse<T>).data;
+  const data = (error.response as AxiosResponse<T>)?.data;
+  const code =
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ((data as any)?.code as string) || error?.code || error?.response?.status;
 
   return {
+    code,
     data,
     message: error.message,
-    code:
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      ((data as any)?.code as string) ||
-      error?.code ||
-      ((error?.response?.status as unknown) as string),
     isCancel: axios.isCancel(error),
+    original: error,
   };
 }
