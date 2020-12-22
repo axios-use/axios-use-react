@@ -6,6 +6,7 @@ describe("useRequest", () => {
   beforeAll(() => {
     mockAdapter.onGet("/users").reply(200, [1, 2]);
   });
+
   it("ready()", async () => {
     const { result } = renderHook(() =>
       useRequest(() => ({ url: "/users", method: "GET" })),

@@ -1,3 +1,4 @@
+import { FC } from "react";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import { renderHook, RenderHookOptions } from "@testing-library/react-hooks";
@@ -5,7 +6,8 @@ import { renderHook, RenderHookOptions } from "@testing-library/react-hooks";
 import { RequestProvider } from "../src";
 
 const mockAdapter = new MockAdapter(axios);
-const AllTheProviders: React.FC = ({ children }) => (
+
+const AllTheProviders: FC = ({ children }) => (
   <RequestProvider value={axios}>{children}</RequestProvider>
 );
 

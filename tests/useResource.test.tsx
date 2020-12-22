@@ -6,6 +6,7 @@ describe("useResource", () => {
   beforeAll(() => {
     mockAdapter.onGet("/users").reply(200, [1, 2]);
   });
+
   it("response", async () => {
     const { result, waitFor } = renderHook(() =>
       useResource(() => ({ url: "/users", method: "GET" })),
@@ -14,7 +15,7 @@ describe("useResource", () => {
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
 
-    act(() => {
+    void act(() => {
       result.current[1]();
     });
 
