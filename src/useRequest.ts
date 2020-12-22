@@ -4,8 +4,14 @@ import axios, {
   CancelTokenSource,
   Canceler,
   CancelToken,
+  AxiosResponse,
 } from "axios";
-import { createRequestError, RequestFactory, Request } from "./request";
+import {
+  createRequestError,
+  RequestFactory,
+  Request,
+  Payload,
+} from "./request";
 import { RequestContext } from "./requestContext";
 
 import { useMountedState } from "./utils";
@@ -37,11 +43,11 @@ export function useRequest<TRequest extends Request>(
   }
 
   const [sources, setSources] = useState<CancelTokenSource[]>([]);
-  const mountedRef = useRef(true);
+  const hasPending = sources.length > 0;
 
   const removeCancelToken = useCallback(
     (cancelToken: CancelToken) => {
-      if (mountedRef.current && getMountedState()) {
+      if (getMountedState()) {
         setSources((prevSources) =>
           prevSources.filter((source) => source.token !== cancelToken),
         );
@@ -56,7 +62,7 @@ export function useRequest<TRequest extends Request>(
   }, [fn]);
 
   const request = useCallback(
-    (...args: Parameters<TRequest> | any[]) => {
+    (...args: Parameters<TRequest>) => {
       const config = callFn.current(...args);
       const source = axios.CancelToken.source();
 
@@ -65,9 +71,8 @@ export function useRequest<TRequest extends Request>(
           setSources((prevSources) => [...prevSources, source]);
         }
         return axiosInstance({ ...config, cancelToken: source.token })
-          .then((response) => {
+          .then((response: AxiosResponse<Payload<TRequest>>) => {
             removeCancelToken(source.token);
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return response.data;
           })
           .catch((error: AxiosError) => {
@@ -88,8 +93,7 @@ export function useRequest<TRequest extends Request>(
     (message?: string) => {
       if (sources.length > 0) {
         sources.map((source) => source.cancel(message));
-        /* istanbul ignore next */
-        if (mountedRef.current && getMountedState()) {
+        if (getMountedState()) {
           setSources([]);
         }
       }
@@ -102,18 +106,14 @@ export function useRequest<TRequest extends Request>(
     clearRef.current = clear;
   });
 
+  const rtnClearFn = useCallback(
+    (message?: string) => clearRef.current(message),
+    [],
+  );
+
   useEffect(() => {
-    return () => {
-      clearRef.current();
-      mountedRef.current = false;
-    };
+    return clearRef.current;
   }, []);
 
-  return [
-    {
-      clear: (message?: string) => clearRef.current(message),
-      hasPending: sources.length > 0,
-    },
-    request,
-  ];
+  return [{ clear: rtnClearFn, hasPending }, request];
 }
