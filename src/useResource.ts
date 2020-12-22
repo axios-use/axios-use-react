@@ -21,7 +21,7 @@ export type UseResourceResult<TRequest extends Request> = [
 
 type Action<T> =
   | { type: "success"; data: T }
-  | { type: "error"; error: RequestError }
+  | { type: "error"; error: RequestError<T> }
   | { type: "reset" | "start" };
 
 function getNextState<TRequest extends Request>(

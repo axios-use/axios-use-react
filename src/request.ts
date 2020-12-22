@@ -25,7 +25,7 @@ export interface RequestDispatcher<TRequest extends Request> {
 }
 
 // Normalize the error response returned from our hooks
-export interface RequestError<T = any> {
+export interface RequestError<T> {
   data: T;
   message: string;
   code?: string;
