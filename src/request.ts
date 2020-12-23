@@ -1,9 +1,4 @@
-import axios, {
-  AxiosRequestConfig,
-  AxiosError,
-  Canceler,
-  AxiosResponse,
-} from "axios";
+import axios, { AxiosRequestConfig, AxiosError, Canceler } from "axios";
 
 export interface Resource<TPayload> extends AxiosRequestConfig {
   payload?: TPayload;
@@ -26,11 +21,11 @@ export interface RequestDispatcher<TRequest extends Request> {
 
 // Normalize the error response returned from our hooks
 export interface RequestError<T> {
-  data: T;
+  data?: T;
   message: string;
   code?: string | number;
   isCancel: boolean;
-  original: AxiosError;
+  original: AxiosError<T>;
 }
 
 export function request<TPayload>(
@@ -45,9 +40,9 @@ export function request<TPayload>(
 }
 
 export function createRequestError<T = any>(
-  error: AxiosError,
+  error: AxiosError<T>,
 ): RequestError<T> {
-  const data = (error.response as AxiosResponse<T>)?.data;
+  const data = error.response?.data;
   const code =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ((data as any)?.code as string) || error?.code || error?.response?.status;

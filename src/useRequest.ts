@@ -75,7 +75,7 @@ export function useRequest<TRequest extends Request>(
             removeCancelToken(source.token);
             return response.data;
           })
-          .catch((error: AxiosError) => {
+          .catch((error: AxiosError<Payload<TRequest>>) => {
             removeCancelToken(source.token);
             throw createRequestError(error);
           });
