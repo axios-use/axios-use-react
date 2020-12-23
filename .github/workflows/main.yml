@@ -33,9 +33,6 @@ jobs:
       - name: Install
         run: yarn
 
-      - name: Typescript compile
-        run: yarn build:cjs --noEmit
-
       - name: Run lint
         run: yarn lint
 
