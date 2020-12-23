@@ -2,6 +2,7 @@
 
 > Managed, cancelable and safely typed requests.
 
+[![CI](https://github.com/react-cmpt/react-request-hook/workflows/CI/badge.svg)](https://github.com/react-cmpt/react-request-hook/actions?query=workflow%3ACI)
 [![npm](https://img.shields.io/npm/v/@react-cmpt/react-request-hook.svg)](https://www.npmjs.com/package/@react-cmpt/react-request-hook)
 [![GitHub license](https://img.shields.io/github/license/react-cmpt/react-request-hook)](https://github.com/react-cmpt/react-request-hook/blob/master/LICENSE)
 
