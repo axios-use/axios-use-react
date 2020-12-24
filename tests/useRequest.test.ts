@@ -18,8 +18,11 @@ describe("useRequest", () => {
     );
 
     await act(async () => {
-      const res = await result.current[1]().ready();
-      expect(res).toStrictEqual(okResponse);
+      const [data, other] = await result.current[1]().ready();
+      expect(data).toStrictEqual(okResponse);
+      expect(other?.status).toBe(200);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      expect(other?.request?.responseURL).toBe("/users");
     });
   });
 

@@ -20,16 +20,20 @@ describe("useResource", () => {
 
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
 
     void act(() => {
       result.current[1]();
     });
 
     expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
 
     await waitFor(() => {
       expect(result.current[0].error).toBeUndefined();
       expect(result.current[0].data).toStrictEqual(okResponse);
+      expect(result.current[0].other?.status).toBe(200);
     });
   });
 
@@ -46,9 +50,12 @@ describe("useResource", () => {
     });
 
     expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
 
     await waitForNextUpdate();
     expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
     expect(result.current[0].error?.code).toBe(errResponse.code);
     expect(result.current[0].error?.data).toStrictEqual(errResponse);
   });
@@ -88,6 +95,7 @@ describe("useResource", () => {
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].error).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
 
     void act(() => {
       result.current[1]();
