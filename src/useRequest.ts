@@ -11,6 +11,7 @@ import {
   RequestFactory,
   Request,
   Payload,
+  AxiosRestResponse,
 } from "./request";
 import { RequestContext } from "./requestContext";
 
@@ -67,12 +68,13 @@ export function useRequest<TRequest extends Request>(
         return axiosInstance({ ...config, cancelToken: source.token })
           .then((response: AxiosResponse<Payload<TRequest>>) => {
             removeCancelToken(source.token);
-            return response.data;
+            const { data, ...restResponse } = response;
+            return [data, restResponse];
           })
           .catch((error: AxiosError<Payload<TRequest>>) => {
             removeCancelToken(source.token);
             throw createRequestError(error);
-          });
+          }) as Promise<[Payload<TRequest>, AxiosRestResponse]>;
       };
 
       return {
