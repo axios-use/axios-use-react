@@ -48,7 +48,7 @@ export function useResource<TRequest extends Request>(
   requestParams?: Parameters<TRequest>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
-  const [{ clear }, createRequest] = useRequest(fn);
+  const [createRequest, { clear }] = useRequest(fn);
   const [state, dispatch] = useReducer(getNextState, {
     isLoading: Boolean(requestParams),
   });

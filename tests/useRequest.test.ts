@@ -18,7 +18,7 @@ describe("useRequest", () => {
     );
 
     await act(async () => {
-      const [data, other] = await result.current[1]().ready();
+      const [data, other] = await result.current[0]().ready();
       expect(data).toStrictEqual(okResponse);
       expect(other?.status).toBe(200);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -33,7 +33,7 @@ describe("useRequest", () => {
 
     await act(async () => {
       try {
-        await result.current[1]().ready();
+        await result.current[0]().ready();
       } catch (e) {
         const error = e as RequestError<typeof errResponse>;
         expect(error.data).toStrictEqual(errResponse);
@@ -49,12 +49,12 @@ describe("useRequest", () => {
     );
 
     void act(() => {
-      void result.current[1]().ready();
-      expect(result.current[0].hasPending).toBeFalsy();
+      void result.current[0]().ready();
+      expect(result.current[1].hasPending).toBeFalsy();
     });
 
     unmount();
-    expect(result.current[0].hasPending).toBeTruthy();
+    expect(result.current[1].hasPending).toBeTruthy();
   });
 
   it("No axios instance", () => {

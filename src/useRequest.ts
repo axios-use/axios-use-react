@@ -21,11 +21,11 @@ const REQUEST_AXIOS_INSTANCE_MESSAGE =
   "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>";
 
 export type UseRequestResult<TRequest extends Request> = [
+  RequestFactory<TRequest>,
   {
     hasPending: boolean;
     clear: Canceler;
   },
-  RequestFactory<TRequest>,
 ];
 
 export function useRequest<TRequest extends Request>(
@@ -111,5 +111,5 @@ export function useRequest<TRequest extends Request>(
     return clearRef.current;
   }, []);
 
-  return [{ clear: rtnClearFn, hasPending }, request];
+  return [request, { clear: rtnClearFn, hasPending }];
 }
