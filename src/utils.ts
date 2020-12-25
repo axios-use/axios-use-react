@@ -1,5 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
-import * as isEqual from "fast-deep-equal";
+import isEqual from "fast-deep-equal";
 
 /**
  * useMountedState

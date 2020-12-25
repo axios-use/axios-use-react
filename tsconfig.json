@@ -3,6 +3,7 @@
     "moduleResolution": "node",
     "target": "es5",
     "module": "commonjs",
+    "esModuleInterop": true,
     "strict": true,
     "jsx": "react-jsx",
     "lib": ["dom", "es5", "es2015"],

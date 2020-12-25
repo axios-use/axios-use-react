@@ -2,8 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "es2015",
-    "jsx": "react-jsxdev",
-    "esModuleInterop": true
+    "jsx": "react-jsxdev"
   },
   "include": ["src/**/*", "tests/**/*"]
 }
