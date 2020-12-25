@@ -1,3 +1,11 @@
+## [2.2.1](https://github.com/react-cmpt/react-request-hook/compare/v2.2.0...v2.2.1) (2020-12-25)
+
+
+### Building
+
+* Not allow Synthetic Default Imports. (for `fast-deep-equal`) ([645d2c2](https://github.com/react-cmpt/react-request-hook/commit/645d2c296421f823d98cf5a3ea302ad20d383dfd))
+
+
 # [2.2.0](https://github.com/react-cmpt/react-request-hook/compare/v2.1.1...v2.2.0) (2020-12-24)
 
 
