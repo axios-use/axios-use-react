@@ -42,9 +42,13 @@ describe("useDeepMemo", () => {
   });
 
   it("Compare", () => {
-    const { result } = renderHook(() => useDeepMemo(obj1));
+    const { result, rerender, unmount } = renderHook(
+      (props) => useDeepMemo(props),
+      {
+        initialProps: obj1,
+      },
+    );
 
-    // the same data
     expect(result.current).toEqual(obj2);
 
     obj1.b.b1 = 0;
@@ -52,5 +56,10 @@ describe("useDeepMemo", () => {
 
     obj2.b.b1 = -1;
     expect(result.current).not.toEqual(obj2);
+
+    rerender({ a: 1, b: { b1: 3 } });
+    expect(result.current).toEqual({ a: 1, b: { b1: 3 } });
+
+    unmount();
   });
 });
