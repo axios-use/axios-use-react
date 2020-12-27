@@ -1,3 +1,11 @@
+## [2.2.2](https://github.com/react-cmpt/react-request-hook/compare/v2.2.1...v2.2.2) (2020-12-27)
+
+
+### Building
+
+* To ensure compatibility in the emitted JavaScript. (`esModuleInterop`, `allowSyntheticDefault`) (for dependencies) ([b62273f](https://github.com/react-cmpt/react-request-hook/commit/b62273f4c84678a515cf0b07e6ac620a6245e852))
+ 
+
 ## [2.2.1](https://github.com/react-cmpt/react-request-hook/compare/v2.2.0...v2.2.1) (2020-12-25)
 
 
