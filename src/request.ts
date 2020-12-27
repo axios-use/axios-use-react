@@ -42,7 +42,7 @@ export function request<TPayload>(
 export function createRequestError<T = any>(
   error: AxiosError<T>,
 ): RequestError<T> {
-  const data = error.response?.data;
+  const data = error?.response?.data;
   const code =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     ((data as any)?.code as string) || error?.code || error?.response?.status;
@@ -50,7 +50,7 @@ export function createRequestError<T = any>(
   return {
     code,
     data,
-    message: error.message,
+    message: error?.message,
     isCancel: axios.isCancel(error),
     original: error,
   };

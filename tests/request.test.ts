@@ -51,5 +51,9 @@ describe("createRequestError", () => {
     };
     expect(createRequestError(err3 as any).code).toEqual(400);
     expect(createRequestError(err3 as any).data).toBeUndefined();
+
+    expect(createRequestError(undefined as any).code).toBeUndefined();
+    expect(createRequestError(undefined as any).data).toBeUndefined();
+    expect(createRequestError(undefined as any).original).toBeUndefined();
   });
 });
