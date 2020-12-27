@@ -1,3 +1,4 @@
+import { renderHook as originalRenderHook } from "@testing-library/react-hooks";
 import { renderHook, mockAdapter, act } from "./utils";
 
 import { useRequest, RequestError } from "../src";
@@ -51,5 +52,22 @@ describe("useRequest", () => {
 
     unmount();
     expect(result.current[0].hasPending).toBeTruthy();
+  });
+
+  it("No axios instance", () => {
+    const { result } = originalRenderHook(() =>
+      useRequest(() => ({ url: "/users", method: "GET" })),
+    );
+
+    void act(() => {
+      try {
+        result.current[1]();
+      } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        expect(error?.message).toEqual(
+          "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>",
+        );
+      }
+    });
   });
 });
