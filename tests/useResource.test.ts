@@ -95,4 +95,86 @@ describe("useResource", () => {
 
     unmount();
   });
+
+  it("clear", async () => {
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useResource(() => ({ url: "/users", method: "GET" })),
+    );
+
+    void act(() => {
+      result.current[1]();
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+
+    void act(() => {
+      result.current[0].cancel();
+    });
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+  });
+
+  it("requestParams", async () => {
+    const { result, rerender, unmount, waitForNextUpdate } = renderHook(
+      (props: number[]) =>
+        useResource(
+          (...args: number[]) => ({
+            url: "/params",
+            method: "GET",
+            params: args,
+          }),
+          props,
+        ),
+      {
+        initialProps: [1],
+      },
+    );
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([1]);
+    expect(result.current[0].error).toBeUndefined();
+
+    rerender([1, 2]);
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toStrictEqual([1]);
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([1, 2]);
+    expect(result.current[0].error).toBeUndefined();
+
+    void act(() => {
+      result.current[1](3);
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toStrictEqual([1, 2]);
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([3]);
+    expect(result.current[0].error).toBeUndefined();
+
+    rerender([5, 6]);
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toStrictEqual([3]);
+    expect(result.current[0].error).toBeUndefined();
+
+    unmount();
+    expect(result.current[0].data).toStrictEqual([3]);
+  });
 });
