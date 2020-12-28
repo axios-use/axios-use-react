@@ -64,7 +64,7 @@ describe("useRequest", () => {
 
     void act(() => {
       try {
-        result.current[1]();
+        result.current[0]();
       } catch (error) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(error?.message).toEqual(
