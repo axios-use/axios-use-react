@@ -57,6 +57,54 @@ describe("useRequest", () => {
     expect(result.current[1].hasPending).toBeTruthy();
   });
 
+  it("clear", async () => {
+    const { result, unmount, waitForNextUpdate } = renderHook(() =>
+      useRequest(() => ({ url: "/users", method: "GET" })),
+    );
+
+    void act(() => {
+      void result.current[0]()
+        .ready()
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          expect(e.message).toStrictEqual("clear-messgae");
+        });
+    });
+
+    void act(() => {
+      void result.current[0]()
+        .ready()
+        .then((r) => {
+          expect(r[0]).toStrictEqual(okResponse);
+        });
+
+      result.current[1].clear("clear-messgae");
+    });
+
+    await waitForNextUpdate();
+
+    void act(() => {
+      void result.current[0]()
+        .ready()
+        .catch((e) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          expect(e.message).toStrictEqual("unmount-messgae");
+        });
+    });
+
+    unmount();
+
+    void act(() => {
+      void result.current[0]()
+        .ready()
+        .then((r) => {
+          expect(r[0]).toStrictEqual(okResponse);
+        });
+
+      result.current[1].clear("unmount-messgae");
+    });
+  });
+
   it("No axios instance", () => {
     const { result } = originalRenderHook(() =>
       useRequest(() => ({ url: "/users", method: "GET" })),
