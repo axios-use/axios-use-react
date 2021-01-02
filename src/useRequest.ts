@@ -11,6 +11,7 @@ import {
   RequestFactory,
   Request,
   Payload,
+  AxiosRestResponse,
 } from "./request";
 import { RequestContext } from "./requestContext";
 
@@ -20,11 +21,11 @@ const REQUEST_AXIOS_INSTANCE_MESSAGE =
   "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>";
 
 export type UseRequestResult<TRequest extends Request> = [
+  RequestFactory<TRequest>,
   {
     hasPending: boolean;
     clear: Canceler;
   },
-  RequestFactory<TRequest>,
 ];
 
 export function useRequest<TRequest extends Request>(
@@ -67,12 +68,13 @@ export function useRequest<TRequest extends Request>(
         return axiosInstance({ ...config, cancelToken: source.token })
           .then((response: AxiosResponse<Payload<TRequest>>) => {
             removeCancelToken(source.token);
-            return response.data;
+            const { data, ...restResponse } = response;
+            return [data, restResponse];
           })
           .catch((error: AxiosError<Payload<TRequest>>) => {
             removeCancelToken(source.token);
             throw createRequestError(error);
-          });
+          }) as Promise<[Payload<TRequest>, AxiosRestResponse]>;
       };
 
       return {
@@ -109,5 +111,5 @@ export function useRequest<TRequest extends Request>(
     return clearRef.current;
   }, []);
 
-  return [{ clear: rtnClearFn, hasPending }, request];
+  return [request, { clear: rtnClearFn, hasPending }];
 }

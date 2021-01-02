@@ -1,4 +1,11 @@
-import axios, { AxiosRequestConfig, AxiosError, Canceler } from "axios";
+import axios, {
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+  Canceler,
+} from "axios";
+
+export type AxiosRestResponse = Omit<AxiosResponse, "data">;
 
 export interface Resource<TPayload> extends AxiosRequestConfig {
   payload?: TPayload;
@@ -11,7 +18,7 @@ export type Payload<TRequest extends Request> = ReturnType<TRequest>["payload"];
 export interface RequestFactory<TRequest extends Request> {
   (...args: Parameters<TRequest>): {
     cancel: Canceler;
-    ready: () => Promise<Payload<TRequest>>;
+    ready: () => Promise<[Payload<TRequest>, AxiosRestResponse]>;
   };
 }
 
@@ -32,6 +39,7 @@ export function request<TPayload>(
   config: AxiosRequestConfig,
   // we use 'payload' to enable non-ts applications to leverage type safety and
   // as a argument sugar that allow us to extract the payload type easily
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _payload?: TPayload,
 ): Resource<TPayload> {
   // we also ignore it here, so the payload value won't propagate as a possible

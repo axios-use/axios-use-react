@@ -1,7 +1,13 @@
 import { useEffect, useCallback, useReducer, useMemo, useRef } from "react";
 import { Canceler } from "axios";
 import { useRequest } from "./useRequest";
-import { Payload, RequestError, Request, RequestDispatcher } from "./request";
+import {
+  Payload,
+  RequestError,
+  Request,
+  RequestDispatcher,
+  AxiosRestResponse,
+} from "./request";
 
 import { useDeepMemo, useMountedState } from "./utils";
 
@@ -10,6 +16,7 @@ const REQUEST_CLEAR_MESSAGE =
 
 type RequestState<TRequest extends Request> = {
   data?: Payload<TRequest>;
+  other?: AxiosRestResponse;
   error?: RequestError<Payload<TRequest>>;
   isLoading: boolean;
 };
@@ -20,7 +27,7 @@ export type UseResourceResult<TRequest extends Request> = [
 ];
 
 type Action<T> =
-  | { type: "success"; data: T }
+  | { type: "success"; data: T; other: AxiosRestResponse }
   | { type: "error"; error: RequestError<T> }
   | { type: "reset" | "start" };
 
@@ -30,6 +37,7 @@ function getNextState<TRequest extends Request>(
 ): RequestState<TRequest> {
   return {
     data: action.type === "success" ? action.data : state.data,
+    other: action.type === "success" ? action.other : state.other,
     error: action.type === "error" ? action.error : undefined,
     isLoading: action.type === "start" ? true : false,
   };
@@ -40,7 +48,7 @@ export function useResource<TRequest extends Request>(
   requestParams?: Parameters<TRequest>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
-  const [{ clear }, createRequest] = useRequest(fn);
+  const [createRequest, { clear }] = useRequest(fn);
   const [state, dispatch] = useReducer(getNextState, {
     isLoading: Boolean(requestParams),
   });
@@ -53,8 +61,8 @@ export function useResource<TRequest extends Request>(
       void (async () => {
         try {
           getMountedState() && dispatch({ type: "start" });
-          const data = await ready();
-          getMountedState() && dispatch({ type: "success", data });
+          const [data, other] = await ready();
+          getMountedState() && dispatch({ type: "success", data, other });
         } catch (e) {
           const error = e as RequestError<Payload<TRequest>>;
           if (getMountedState() && !error.isCancel) {

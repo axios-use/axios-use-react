@@ -3,6 +3,7 @@
   "rootDir": ".",
   "preset": "ts-jest",
   "testEnvironment": "node",
+  "collectCoverageFrom": ["src/**/*"],
   "globals": {
     "ts-jest": {
       "tsconfig": "tsconfig.test.json"
