@@ -1,3 +1,37 @@
+# [3.0.0](https://github.com/react-cmpt/react-request-hook/compare/v2.2.2...v3.0.0) (2021-01-03)
+
+
+### Features
+
+* **useRequest:** swap returns ([7169e9e](https://github.com/react-cmpt/react-request-hook/commit/7169e9e5fd1fbb4d89f1f8b729d7bb773545f1cc))
+   ```tsx
+   // before
+   const [request, createRequest] = useRequest(...);
+   // now
+   const [createRequest, request] = useRequest(...);
+   ```
+* return other responses ([3924e0c](https://github.com/react-cmpt/react-request-hook/commit/3924e0cb67e66155702ff1ea6d113a2f69f462b5))
+  ```tsx
+  const [createRequest] = useRequest(...);
+  
+  const fetch = async () => {
+    // before
+    const response = await createRequest.ready();
+
+    // now. [T, Omit<AxiosResponse<T>, "data">]
+    const [response, otherAxiosReponse] = await createRequest.ready();
+  }
+  ```
+  ```tsx
+  // before
+  const [{ data, error, isLoading, cancel }] = useResource(...);
+  
+  // now. other: Omit<AxiosResponse, "data">
+  const [{ data, other, error, isLoading, cancel }] = useResource(...);
+  ```
+
+
+
 ## [2.2.2](https://github.com/react-cmpt/react-request-hook/compare/v2.2.1...v2.2.2) (2020-12-27)
 
 
