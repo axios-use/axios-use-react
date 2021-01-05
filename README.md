@@ -43,18 +43,18 @@ ReactDOM.render(
 
 ```tsx
 // js
-const [createRequest, request] = useRequest((id) => ({
+const [createRequest, { hasPending, cancel }] = useRequest((id) => ({
   url: `/user/${id}`,
   method: "GET",
 }));
 
 // tsx
-const [createRequest, request] = useRequest(
+const [createRequest, { hasPending, cancel }] = useRequest((id: string) =>
   // response.data: Result. AxiosResponse<Result>
-  request<Result>((id: string) => ({
+  request<Result>({
     url: `/user/${id}`,
     method: "GET",
-  })),
+  }),
 );
 ```
 
@@ -66,11 +66,9 @@ interface CreateRequest {
   cancel: Canceler;
 }
 
-interface Request {
-  hasPending: boolean;
-  // Axios Canceler. clear all pending requests(CancelTokenSource).
-  cancel: Canceler;
-}
+type HasPending = boolean;
+// Axios Canceler. clear all pending requests(CancelTokenSource).
+type Cancel = Canceler;
 ```
 
 ```jsx
@@ -103,12 +101,12 @@ const [reqState, fetch] = useResource((id) => ({
 }));
 
 // tsx
-const [reqState, fetch] = useResource(
+const [reqState, fetch] = useResource((id: string) =>
   // response.data: Result. AxiosResponse<Result>
-  request<Result>((id: string) => ({
+  request<Result>({
     url: `/user/${id}`,
     method: "GET",
-  })),
+  }),
 );
 ```
 
