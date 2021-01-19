@@ -35,15 +35,7 @@ export interface RequestError<T> {
   original: AxiosError<T>;
 }
 
-export function request<TPayload>(
-  config: AxiosRequestConfig,
-  // we use 'payload' to enable non-ts applications to leverage type safety and
-  // as a argument sugar that allow us to extract the payload type easily
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _payload?: TPayload,
-): Resource<TPayload> {
-  // we also ignore it here, so the payload value won't propagate as a possible
-  // undefined, where its default value is actually `null`.
+export function request<T>(config: AxiosRequestConfig): Resource<T> {
   return config;
 }
 
