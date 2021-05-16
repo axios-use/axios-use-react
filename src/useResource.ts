@@ -1,4 +1,11 @@
-import { useEffect, useCallback, useReducer, useMemo, useRef } from "react";
+import {
+  useEffect,
+  useCallback,
+  useContext,
+  useReducer,
+  useMemo,
+  useRef,
+} from "react";
 import { Canceler } from "axios";
 import { useRequest } from "./useRequest";
 import {
@@ -8,6 +15,8 @@ import {
   RequestDispatcher,
   AxiosRestResponse,
 } from "./request";
+import { RequestContext, RequestContextConfig } from "./requestContext";
+import { createCacheKey } from "./cache";
 
 import { useDeepMemo, useMountedState } from "./utils";
 
@@ -48,8 +57,16 @@ export function useResource<TRequest extends Request>(
   requestParams?: Parameters<TRequest>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
+  const RequestConfig =
+    useContext<RequestContextConfig<Payload<TRequest>>>(RequestContext);
+  const requestCache = RequestConfig?.cache;
+  const cacheKey = requestCache && createCacheKey(fn(requestParams));
+  const cacheData =
+    (cacheKey && requestCache && requestCache?.get(cacheKey)) ?? undefined;
+
   const [createRequest, { clear }] = useRequest(fn);
   const [state, dispatch] = useReducer(getNextState, {
+    data: cacheData,
     isLoading: Boolean(requestParams),
   });
 
@@ -62,7 +79,11 @@ export function useResource<TRequest extends Request>(
         try {
           getMountedState() && dispatch({ type: "start" });
           const [data, other] = await ready();
-          getMountedState() && dispatch({ type: "success", data, other });
+          if (getMountedState()) {
+            dispatch({ type: "success", data, other });
+
+            cacheKey && requestCache && requestCache?.set(cacheKey, data);
+          }
         } catch (e) {
           const error = e as RequestError<Payload<TRequest>>;
           if (getMountedState() && !error.isCancel) {
@@ -73,7 +94,8 @@ export function useResource<TRequest extends Request>(
 
       return cancel;
     },
-    [clear, createRequest, getMountedState],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cacheKey, clear, createRequest, getMountedState],
   );
 
   const requestRefFn = useRef(request);
