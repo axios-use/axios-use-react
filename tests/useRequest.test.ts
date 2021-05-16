@@ -1,7 +1,8 @@
 import { renderHook as originalRenderHook } from "@testing-library/react-hooks";
 import { renderHook, mockAdapter, act } from "./utils";
 
-import { useRequest, RequestError } from "../src";
+import type { RequestError } from "../src";
+import { useRequest } from "../src";
 
 const okResponse = { code: 0, data: [1, 2], message: null };
 const errResponse = { code: 2001, data: [3, 4], message: "some error" };

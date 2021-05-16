@@ -1,7 +1,8 @@
 import { createContext } from "react";
 import type { AxiosInstance } from "axios";
 
-import { Cache, wrapCache } from "./cache";
+import type { Cache } from "./cache";
+import { wrapCache } from "./cache";
 
 export type RequestContextConfig<T = any> = {
   axiosInstance?: AxiosInstance;

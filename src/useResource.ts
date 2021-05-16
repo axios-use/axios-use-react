@@ -6,16 +6,17 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { Canceler } from "axios";
+import type { Canceler } from "axios";
 import { useRequest } from "./useRequest";
-import {
+import type {
   Payload,
   RequestError,
   Request,
   RequestDispatcher,
   AxiosRestResponse,
 } from "./request";
-import { RequestContext, RequestContextConfig } from "./requestContext";
+import type { RequestContextConfig } from "./requestContext";
+import { RequestContext } from "./requestContext";
 import { createCacheKey } from "./cache";
 
 import { useDeepMemo, useMountedState } from "./utils";
