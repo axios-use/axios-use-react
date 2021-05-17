@@ -6,6 +6,7 @@ export interface Cache<T = any> {
   get(key: CacheKey): T | null | undefined;
   set(key: CacheKey, value: T): void;
   delete(key: CacheKey): void;
+  clear(): void;
 }
 
 export function createCacheKey(config: Resource<any>): CacheKey {
