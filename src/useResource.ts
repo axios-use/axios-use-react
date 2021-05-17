@@ -63,7 +63,9 @@ export function useResource<TRequest extends Request>(
   const requestCache = RequestConfig?.cache;
   const cacheKey = requestCache && createCacheKey(fn(requestParams));
   const cacheData =
-    (cacheKey && requestCache && requestCache?.get(cacheKey)) ?? undefined;
+    cacheKey && requestCache && requestCache?.get
+      ? requestCache.get(cacheKey) ?? undefined
+      : undefined;
 
   const [createRequest, { clear }] = useRequest(fn);
   const [state, dispatch] = useReducer(getNextState, {
