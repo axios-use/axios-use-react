@@ -15,7 +15,7 @@ import type {
   RequestDispatcher,
   AxiosRestResponse,
 } from "./request";
-import type { RequestContextConfig } from "./requestContext";
+import type { RequestContextValue } from "./requestContext";
 import { RequestContext } from "./requestContext";
 import { createCacheKey } from "./cache";
 
@@ -59,7 +59,7 @@ export function useResource<TRequest extends Request>(
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig =
-    useContext<RequestContextConfig<Payload<TRequest>>>(RequestContext);
+    useContext<RequestContextValue<Payload<TRequest>>>(RequestContext);
   const requestCache = RequestConfig?.cache;
   const cacheKey = requestCache && createCacheKey(fn(requestParams));
   const cacheData =
