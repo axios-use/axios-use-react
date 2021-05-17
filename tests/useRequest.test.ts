@@ -1,5 +1,10 @@
-import { renderHook as originalRenderHook } from "@testing-library/react-hooks";
-import { renderHook, mockAdapter, act } from "./utils";
+import {
+  renderHook,
+  originalRenderHook,
+  mockAdapter,
+  act,
+  cache,
+} from "./utils";
 
 import type { RequestError } from "../src";
 import { useRequest } from "../src";
@@ -11,6 +16,14 @@ describe("useRequest", () => {
   beforeAll(() => {
     mockAdapter.onGet("/users").reply(200, okResponse);
     mockAdapter.onGet("/400").reply(400, errResponse);
+  });
+
+  beforeEach(() => {
+    cache.clear();
+  });
+
+  afterAll(() => {
+    cache.clear();
   });
 
   it("ready() success", async () => {
