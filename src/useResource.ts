@@ -15,11 +15,14 @@ import type {
   RequestDispatcher,
   AxiosRestResponse,
 } from "./request";
-import type { RequestContextValue } from "./requestContext";
+import type {
+  RequestContextValue,
+  RequestContextConfig,
+} from "./requestContext";
 import { RequestContext } from "./requestContext";
-import { createCacheKey } from "./cache";
+import type { CacheKey, CacheKeyFn } from "./cache";
 
-import { useDeepMemo, useMountedState } from "./utils";
+import { useDeepMemo, useMountedState, getStrByFn } from "./utils";
 
 const REQUEST_CLEAR_MESSAGE =
   "A new request has been made before completing the last one";
@@ -35,6 +38,13 @@ export type UseResourceResult<TRequest extends Request> = [
   RequestState<TRequest> & { cancel: Canceler },
   RequestDispatcher<TRequest>,
 ];
+
+export type UseResourceOptions<T = any> = Pick<
+  RequestContextConfig<T>,
+  "cache" | "cacheFilter"
+> & {
+  cacheKey?: CacheKey | CacheKeyFn<T>;
+};
 
 type Action<T> =
   | { type: "success"; data: T; other: AxiosRestResponse }
@@ -56,16 +66,50 @@ function getNextState<TRequest extends Request>(
 export function useResource<TRequest extends Request>(
   fn: TRequest,
   requestParams?: Parameters<TRequest>,
+  options?: UseResourceOptions<Payload<TRequest>>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig =
     useContext<RequestContextValue<Payload<TRequest>>>(RequestContext);
-  const requestCache = RequestConfig?.cache;
-  const cacheKey = requestCache && createCacheKey(fn(requestParams));
-  const cacheData =
-    cacheKey && requestCache && requestCache?.get
+
+  const fnOptions = useDeepMemo(fn(...(requestParams || [])));
+  const requestCache = useMemo(() => {
+    const filter = options?.cacheFilter || RequestConfig?.cacheFilter;
+    if (filter && typeof filter === "function") {
+      if (filter(fnOptions)) {
+        return options?.cache ?? RequestConfig?.cache;
+      }
+      return undefined;
+    }
+
+    if (
+      fnOptions?.method === null ||
+      fnOptions?.method === undefined ||
+      /^get$/i.test(fnOptions.method)
+    ) {
+      return options?.cache ?? RequestConfig?.cache;
+    }
+    return undefined;
+  }, [
+    RequestConfig?.cache,
+    RequestConfig?.cacheFilter,
+    fnOptions,
+    options?.cache,
+    options?.cacheFilter,
+  ]);
+  const cacheKey = useMemo(() => {
+    return (
+      (requestCache &&
+        (getStrByFn(options?.cacheKey, fnOptions) ??
+          getStrByFn(RequestConfig?.cacheKey, fnOptions))) ||
+      undefined
+    );
+  }, [RequestConfig?.cacheKey, fnOptions, options?.cacheKey, requestCache]);
+  const cacheData = useMemo(() => {
+    return requestCache && cacheKey && typeof requestCache.get === "function"
       ? requestCache.get(cacheKey) ?? undefined
       : undefined;
+  }, [cacheKey, requestCache]);
 
   const [createRequest, { clear }] = useRequest(fn);
   const [state, dispatch] = useReducer(getNextState, {
@@ -85,7 +129,10 @@ export function useResource<TRequest extends Request>(
           if (getMountedState()) {
             dispatch({ type: "success", data, other });
 
-            cacheKey && requestCache && requestCache?.set(cacheKey, data);
+            cacheKey &&
+              requestCache &&
+              typeof requestCache.set === "function" &&
+              requestCache.set(cacheKey, data);
           }
         } catch (e) {
           const error = e as RequestError<Payload<TRequest>>;

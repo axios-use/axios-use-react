@@ -33,3 +33,19 @@ export function useDeepMemo<T>(value: T): T {
 
   return ref.current;
 }
+
+/**
+ *
+ * @param strOrFn
+ * @param args
+ * @returns string | number | undefined
+ */
+export function getStrByFn<F extends (...args: any[]) => string | number>(
+  strOrFn?: string | number | F,
+  ...args: Parameters<F>
+): string | number | undefined {
+  if (typeof strOrFn === "function") {
+    return strOrFn(...args);
+  }
+  return strOrFn;
+}
