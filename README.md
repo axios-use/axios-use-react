@@ -28,12 +28,21 @@ const axiosInstance = axios.create({
 });
 
 ReactDOM.render(
-  <RequestProvider value={axiosInstance}>
+  <RequestProvider instance={axiosInstance}>
     <App />
   </RequestProvider>,
   document.getElementById("root"),
 );
 ```
+
+#### config
+
+| config      | type            | explain                                                    |
+| ----------- | --------------- | ---------------------------------------------------------- |
+| instance    | object          | axios instance                                             |
+| cache       | object \| false | Customized cache collections. Or close. (**Default on**)   |
+| cacheKey    | function        | Global custom formatted cache keys                         |
+| cacheFilter | function        | Global callback function to decide whether to cache or not |
 
 ### useRequest
 
@@ -88,10 +97,13 @@ useEffect(() => {
 
 ### useResource
 
-| option     | type     | explain                                          |
-| ---------- | -------- | ------------------------------------------------ |
-| fn         | function | get AxiosRequestConfig function                  |
-| parameters | array    | `fn` function parameters. effect dependency list |
+| option              | type                        | explain                                             |
+| ------------------- | --------------------------- | --------------------------------------------------- |
+| fn                  | function                    | get AxiosRequestConfig function                     |
+| parameters          | array                       | `fn` function parameters. effect dependency list    |
+| options.cache       | object \| false             | Customized cache collections. Or close              |
+| options.cacheKey    | string\| number \| function | Custom cache key value                              |
+| options.cacheFilter | function                    | Callback function to decide whether to cache or not |
 
 ```tsx
 // js
