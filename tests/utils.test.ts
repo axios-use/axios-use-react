@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react-hooks";
 
-import { useMountedState, useDeepMemo } from "../src";
+import { useMountedState, useDeepMemo, getStrByFn } from "../src";
 
 describe("useMountedState", () => {
   it("should be defined", () => {
@@ -61,5 +61,26 @@ describe("useDeepMemo", () => {
     expect(result.current).toEqual({ a: 1, b: { b1: 3 } });
 
     unmount();
+  });
+});
+
+describe("getStrByFn", () => {
+  it("string/number", () => {
+    expect(getStrByFn("demo")).toBe("demo");
+    expect(getStrByFn(1)).toBe(1);
+    expect(getStrByFn(3.1415)).toBe(3.1415);
+    expect(getStrByFn(null as any)).toBeNull();
+    expect(getStrByFn(undefined as any)).toBeUndefined();
+  });
+
+  it("function", () => {
+    expect(getStrByFn(() => "demo")).toBe("demo");
+    expect(getStrByFn(() => 3.1415)).toBe(3.1415);
+    expect(getStrByFn((a: string) => a, "demo")).toBe("demo");
+    expect(getStrByFn((a: number, b: number) => a + b, 1, 2)).toBe(3);
+    expect(getStrByFn((a: number) => a, 3.1415)).toBe(3.1415);
+    expect(getStrByFn((a: number) => a, undefined as any)).toBeUndefined();
+    expect(getStrByFn((a: number) => a, null as any)).toBeNull();
+    expect(getStrByFn((a: number) => a, false as any)).toBeFalsy();
   });
 });
