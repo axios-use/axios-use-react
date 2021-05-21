@@ -1,6 +1,19 @@
-import { renderHook, mockAdapter, act, cache } from "./utils";
+import {
+  renderHook,
+  originalRenderHook,
+  mockAdapter,
+  act,
+  cache,
+  axios,
+} from "./utils";
 
-import { useResource } from "../src";
+import type { Resource } from "../src";
+import {
+  useResource,
+  RequestProvider,
+  wrapCache,
+  createCacheKey,
+} from "../src";
 
 const okResponse = { code: 0, data: [1, 2], message: null };
 const errResponse = { code: 2001, data: [3, 4], message: "some error" };
@@ -199,8 +212,12 @@ describe("useResource - cache", () => {
   let rtnData = [1, 2];
 
   beforeAll(() => {
-    cache.clear();
     mockAdapter.onGet("/get").reply(() => [200, rtnData]);
+    mockAdapter.onPost("/post").reply(() => [200, true]);
+  });
+
+  beforeEach(() => {
+    cache.clear();
   });
 
   it("cache response", async () => {
@@ -254,8 +271,212 @@ describe("useResource - cache", () => {
     expect(req01.result.current[0].error).toBeUndefined();
   });
 
+  it("cache default filter", async () => {
+    const { result, waitForNextUpdate, unmount } = renderHook(() =>
+      useResource(() => ({
+        url: "/post",
+        method: "POST",
+      })),
+    );
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].error).toBeUndefined();
+
+    void act(() => {
+      result.current[1]();
+    });
+    await waitForNextUpdate();
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeTruthy();
+    expect(result.current[0].error).toBeUndefined();
+
+    unmount();
+
+    const req01 = renderHook(() =>
+      useResource(() => ({
+        url: "/post",
+        method: "POST",
+      })),
+    );
+
+    expect(req01.result.current[0].isLoading).toBeFalsy();
+    expect(req01.result.current[0].data).toBeUndefined();
+    expect(req01.result.current[0].error).toBeUndefined();
+
+    rtnData = [3, 4];
+
+    void act(() => {
+      req01.result.current[1]();
+    });
+
+    expect(req01.result.current[0].isLoading).toBeTruthy();
+    expect(req01.result.current[0].data).toBeUndefined();
+    expect(req01.result.current[0].error).toBeUndefined();
+
+    await req01.waitForNextUpdate();
+
+    expect(req01.result.current[0].isLoading).toBeFalsy();
+    expect(req01.result.current[0].data).toBeTruthy();
+    expect(req01.result.current[0].error).toBeUndefined();
+  });
+
+  it("cache custom filter", async () => {
+    const mycache = wrapCache(new Map());
+    const commonKey = "demo-post-key";
+    const { result, waitForNextUpdate } = originalRenderHook(
+      () =>
+        useResource(
+          () => ({
+            url: "/post",
+            method: "POST",
+            data: true,
+          }),
+          undefined,
+          { cacheKey: commonKey },
+        ),
+      {
+        // eslint-disable-next-line react/display-name
+        wrapper: (props) => (
+          <RequestProvider
+            instance={axios}
+            cache={mycache}
+            cacheFilter={(c) => c.data as boolean}
+            {...props}
+          />
+        ),
+      },
+    );
+
+    void act(() => {
+      result.current[1]();
+    });
+    await waitForNextUpdate();
+    expect(result.current[0].data).toBeTruthy();
+
+    const req01 = originalRenderHook(
+      () =>
+        useResource(
+          () => ({
+            url: "/post",
+            method: "POST",
+            data: false,
+          }),
+          undefined,
+          { cacheKey: commonKey },
+        ),
+      {
+        // eslint-disable-next-line react/display-name
+        wrapper: (props) => (
+          <RequestProvider
+            instance={axios}
+            cache={mycache}
+            cacheFilter={(c) => c.data as boolean}
+            {...props}
+          />
+        ),
+      },
+    );
+    expect(req01.result.current[0].isLoading).toBeFalsy();
+    expect(req01.result.current[0].data).toBeFalsy();
+    expect(req01.result.current[0].error).toBeUndefined();
+
+    void act(() => {
+      req01.result.current[1]();
+    });
+    await req01.waitForNextUpdate();
+
+    expect(req01.result.current[0].isLoading).toBeFalsy();
+    expect(req01.result.current[0].data).toBeTruthy();
+    expect(req01.result.current[0].error).toBeUndefined();
+
+    const req02 = originalRenderHook(
+      () =>
+        useResource(
+          () => ({
+            url: "/post",
+            method: "POST",
+            data: true,
+          }),
+          undefined,
+          { cacheKey: commonKey },
+        ),
+      {
+        // eslint-disable-next-line react/display-name
+        wrapper: (props) => (
+          <RequestProvider
+            instance={axios}
+            cache={mycache}
+            cacheFilter={(c) => c.data as boolean}
+            {...props}
+          />
+        ),
+      },
+    );
+    expect(req02.result.current[0].isLoading).toBeFalsy();
+    expect(req02.result.current[0].data).toBeTruthy();
+    expect(req02.result.current[0].error).toBeUndefined();
+
+    void act(() => {
+      req02.result.current[1]();
+    });
+    await req02.waitForNextUpdate();
+
+    expect(req02.result.current[0].isLoading).toBeFalsy();
+    expect(req02.result.current[0].data).toBeTruthy();
+    expect(req02.result.current[0].error).toBeUndefined();
+  });
+
+  it("cacheKey", async () => {
+    rtnData = [1, 2];
+    const mycache = wrapCache(new Map());
+
+    const reqConfig: Resource<number[]> = {
+      url: "/get",
+      method: "GET",
+    };
+
+    const { result, waitForNextUpdate } = originalRenderHook(
+      () => useResource(() => reqConfig),
+      {
+        // eslint-disable-next-line react/display-name
+        wrapper: (props) => (
+          <RequestProvider instance={axios} cache={mycache} {...props} />
+        ),
+      },
+    );
+
+    void act(() => {
+      result.current[1]();
+    });
+
+    await waitForNextUpdate();
+    expect(result.current[0].data).toStrictEqual(rtnData);
+    expect(mycache.get(createCacheKey(reqConfig))).toStrictEqual(rtnData);
+
+    const customKey = () => "demoKey";
+    const req01 = originalRenderHook(
+      () => useResource(() => reqConfig, undefined, { cacheKey: customKey }),
+      {
+        // eslint-disable-next-line react/display-name
+        wrapper: (props) => (
+          <RequestProvider instance={axios} cache={mycache} {...props} />
+        ),
+      },
+    );
+
+    void act(() => {
+      req01.result.current[1]();
+    });
+
+    await req01.waitForNextUpdate();
+    expect(result.current[0].data).toStrictEqual(rtnData);
+    expect(mycache.get(customKey())).toStrictEqual(rtnData);
+    expect(customKey()).not.toStrictEqual(createCacheKey(reqConfig));
+  });
+
   it("close cache", async () => {
-    cache.clear();
     rtnData = [5, 6];
 
     const { result, waitForNextUpdate } = renderHook(
@@ -282,15 +503,15 @@ describe("useResource - cache", () => {
     expect(result.current[0].data).toStrictEqual([5, 6]);
     expect(result.current[0].error).toBeUndefined();
 
-    const req01 = renderHook(
-      () =>
-        useResource(() => ({
+    const req01 = renderHook(() =>
+      useResource(
+        () => ({
           url: "/get",
           method: "GET",
-        })),
-      {
-        cache: false,
-      },
+        }),
+        undefined,
+        { cache: false },
+      ),
     );
 
     expect(req01.result.current[0].isLoading).toBeFalsy();
@@ -312,5 +533,36 @@ describe("useResource - cache", () => {
     expect(req01.result.current[0].isLoading).toBeFalsy();
     expect(req01.result.current[0].data).toStrictEqual([7, 8]);
     expect(req01.result.current[0].error).toBeUndefined();
+
+    const req02 = renderHook(
+      () =>
+        useResource(() => ({
+          url: "/get",
+          method: "GET",
+        })),
+      {
+        cache: false,
+      },
+    );
+
+    expect(req02.result.current[0].isLoading).toBeFalsy();
+    expect(req02.result.current[0].data).toBeUndefined();
+    expect(req02.result.current[0].error).toBeUndefined();
+
+    rtnData = [9, 10];
+
+    void act(() => {
+      req02.result.current[1]();
+    });
+
+    expect(req02.result.current[0].isLoading).toBeTruthy();
+    expect(req02.result.current[0].data).toBeUndefined();
+    expect(req02.result.current[0].error).toBeUndefined();
+
+    await req02.waitForNextUpdate();
+
+    expect(req02.result.current[0].isLoading).toBeFalsy();
+    expect(req02.result.current[0].data).toStrictEqual([9, 10]);
+    expect(req02.result.current[0].error).toBeUndefined();
   });
 });
