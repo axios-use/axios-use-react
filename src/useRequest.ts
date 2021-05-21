@@ -34,7 +34,7 @@ export function useRequest<TRequest extends Request>(
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
-  const axiosInstance = RequestConfig?.axiosInstance;
+  const axiosInstance = RequestConfig?.instance;
 
   if (!axiosInstance) {
     throw new Error(REQUEST_AXIOS_INSTANCE_MESSAGE);

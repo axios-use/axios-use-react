@@ -16,8 +16,7 @@ export const cache = wrapCache(new Map());
 const AllTheProviders: FC<{ cache?: RequestContextConfig["cache"] }> = (
   props,
 ) => (
-  <RequestProvider
-    value={{ axiosInstance: axios, cache: props.cache ?? cache }}>
+  <RequestProvider instance={axios} cache={props.cache ?? cache}>
     {props.children}
   </RequestProvider>
 );

@@ -25,12 +25,3 @@ export function createCacheKey(config: Resource<any>): CacheKey {
 export function wrapCache<T = any>(provider: Cache<T>): Cache {
   return provider;
 }
-
-export function createCache<T>(provider: Cache): {
-  cache: Cache;
-} {
-  const cache = wrapCache<T>(provider);
-  return {
-    cache,
-  };
-}
