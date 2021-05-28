@@ -1,15 +1,28 @@
-import { useEffect, useCallback, useReducer, useMemo, useRef } from "react";
-import { Canceler } from "axios";
-import { useRequest } from "./useRequest";
 import {
+  useEffect,
+  useCallback,
+  useContext,
+  useReducer,
+  useMemo,
+  useRef,
+} from "react";
+import type { Canceler } from "axios";
+import { useRequest } from "./useRequest";
+import type {
   Payload,
   RequestError,
   Request,
   RequestDispatcher,
   AxiosRestResponse,
 } from "./request";
+import type {
+  RequestContextValue,
+  RequestContextConfig,
+} from "./requestContext";
+import { RequestContext } from "./requestContext";
+import type { CacheKey, CacheKeyFn } from "./cache";
 
-import { useDeepMemo, useMountedState } from "./utils";
+import { useDeepMemo, useMountedState, getStrByFn } from "./utils";
 
 const REQUEST_CLEAR_MESSAGE =
   "A new request has been made before completing the last one";
@@ -25,6 +38,13 @@ export type UseResourceResult<TRequest extends Request> = [
   RequestState<TRequest> & { cancel: Canceler },
   RequestDispatcher<TRequest>,
 ];
+
+export type UseResourceOptions<T = any> = Pick<
+  RequestContextConfig<T>,
+  "cache" | "cacheFilter"
+> & {
+  cacheKey?: CacheKey | CacheKeyFn<T>;
+};
 
 type Action<T> =
   | { type: "success"; data: T; other: AxiosRestResponse }
@@ -46,10 +66,54 @@ function getNextState<TRequest extends Request>(
 export function useResource<TRequest extends Request>(
   fn: TRequest,
   requestParams?: Parameters<TRequest>,
+  options?: UseResourceOptions<Payload<TRequest>>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
+  const RequestConfig =
+    useContext<RequestContextValue<Payload<TRequest>>>(RequestContext);
+
+  const fnOptions = useDeepMemo(fn(...(requestParams || [])));
+  const requestCache = useMemo(() => {
+    const filter = options?.cacheFilter || RequestConfig?.cacheFilter;
+    if (filter && typeof filter === "function") {
+      if (filter(fnOptions)) {
+        return options?.cache ?? RequestConfig?.cache;
+      }
+      return undefined;
+    }
+
+    if (
+      fnOptions?.method === null ||
+      fnOptions?.method === undefined ||
+      /^get$/i.test(fnOptions.method)
+    ) {
+      return options?.cache ?? RequestConfig?.cache;
+    }
+    return undefined;
+  }, [
+    RequestConfig?.cache,
+    RequestConfig?.cacheFilter,
+    fnOptions,
+    options?.cache,
+    options?.cacheFilter,
+  ]);
+  const cacheKey = useMemo(() => {
+    return (
+      (requestCache &&
+        (getStrByFn(options?.cacheKey, fnOptions) ??
+          getStrByFn(RequestConfig?.cacheKey, fnOptions))) ||
+      undefined
+    );
+  }, [RequestConfig?.cacheKey, fnOptions, options?.cacheKey, requestCache]);
+  const cacheData = useMemo(() => {
+    return requestCache && cacheKey && typeof requestCache.get === "function"
+      ? requestCache.get(cacheKey) ?? undefined
+      : undefined;
+  }, [cacheKey, requestCache]);
+
   const [createRequest, { clear }] = useRequest(fn);
   const [state, dispatch] = useReducer(getNextState, {
+    data: cacheData,
     isLoading: Boolean(requestParams),
   });
 
@@ -62,7 +126,14 @@ export function useResource<TRequest extends Request>(
         try {
           getMountedState() && dispatch({ type: "start" });
           const [data, other] = await ready();
-          getMountedState() && dispatch({ type: "success", data, other });
+          if (getMountedState()) {
+            dispatch({ type: "success", data, other });
+
+            cacheKey &&
+              requestCache &&
+              typeof requestCache.set === "function" &&
+              requestCache.set(cacheKey, data);
+          }
         } catch (e) {
           const error = e as RequestError<Payload<TRequest>>;
           if (getMountedState() && !error.isCancel) {
@@ -73,7 +144,8 @@ export function useResource<TRequest extends Request>(
 
       return cancel;
     },
-    [clear, createRequest, getMountedState],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cacheKey, clear, createRequest, getMountedState],
   );
 
   const requestRefFn = useRef(request);

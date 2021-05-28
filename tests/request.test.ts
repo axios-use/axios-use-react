@@ -1,4 +1,4 @@
-import { AxiosRequestConfig } from "axios";
+import type { AxiosRequestConfig } from "axios";
 import { request, createRequestError } from "../src";
 
 const config1 = { url: "/config1", method: "GET" } as AxiosRequestConfig;

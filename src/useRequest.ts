@@ -1,18 +1,19 @@
 import { useState, useCallback, useContext, useRef, useEffect } from "react";
-import axios, {
+import type {
   AxiosError,
   CancelTokenSource,
   Canceler,
   CancelToken,
   AxiosResponse,
 } from "axios";
-import {
-  createRequestError,
+import axios from "axios";
+import type {
   RequestFactory,
   Request,
   Payload,
   AxiosRestResponse,
 } from "./request";
+import { createRequestError } from "./request";
 import { RequestContext } from "./requestContext";
 
 import { useMountedState } from "./utils";
@@ -32,7 +33,9 @@ export function useRequest<TRequest extends Request>(
   fn: TRequest,
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
-  const axiosInstance = useContext(RequestContext);
+  const RequestConfig = useContext(RequestContext);
+  const axiosInstance = RequestConfig?.instance;
+
   if (!axiosInstance) {
     throw new Error(REQUEST_AXIOS_INSTANCE_MESSAGE);
   }

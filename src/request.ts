@@ -1,9 +1,10 @@
-import axios, {
+import type {
   AxiosRequestConfig,
   AxiosResponse,
   AxiosError,
   Canceler,
 } from "axios";
+import axios from "axios";
 
 export type AxiosRestResponse = Omit<AxiosResponse, "data">;
 
