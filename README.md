@@ -147,7 +147,20 @@ const [reqState] = useResource(
   }),
   [id],
 );
+
+// no parameters
+const [reqState] = useResource(
+  () => ({
+    url: "/users/",
+    method: "GET",
+  }),
+  [],
+);
 ```
+
+#### cache
+
+https://codesandbox.io/s/react-request-hook-cache-9o2hz
 
 ### other
 
