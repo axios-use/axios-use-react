@@ -11,6 +11,14 @@
     "type": "git",
     "url": "git+https://github.com/react-cmpt/react-request-hook.git"
   },
+  "keywords": [
+    "axios",
+    "hooks",
+    "react",
+    "request",
+    "useRequest",
+    "useResource"
+  ],
   "main": "lib/index.js",
   "module": "esm/index.js",
   "types": "lib/index.d.ts",
