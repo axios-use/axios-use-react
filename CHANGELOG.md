@@ -1,3 +1,30 @@
+# [4.0.0](https://github.com/react-cmpt/react-request-hook/compare/v3.0.0...v4.0.0) (2021-06-02)
+
+
+### Features
+
+* **useResource:** Use cache initialization state ([#2](https://github.com/react-cmpt/react-request-hook/pull/2))
+* **context:** separate the values of provider(props) ([35ea8a2](https://github.com/react-cmpt/react-request-hook/commit/35ea8a2b01affbbe17867ada2d541089b7c15277))
+  ```diff
+  - <RequestProvider value={axiosInstance}>
+  + <RequestProvider instance={axiosInstance}>
+      <App />
+    </RequestProvider>,
+  ```
+* **type:** split with RequestContextConfig (null) ([fd91fcb](https://github.com/react-cmpt/react-request-hook/commit/fd91fcb7d7832778034c83ce965f12c58d2eaea0))
+  ```tsx
+  export type RequestContextConfig<T = any> = {
+    instance?: AxiosInstance;
+    cache?: Cache<T> | false;
+    cacheKey?: CacheKeyFn<T>;
+    cacheFilter?: CacheFilter<T>;
+  };
+
+  export type RequestContextValue<T = any> = RequestContextConfig<T> | null;
+  ```
+
+
+
 # [3.0.0](https://github.com/react-cmpt/react-request-hook/compare/v2.2.2...v3.0.0) (2021-01-03)
 
 
