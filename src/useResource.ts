@@ -39,11 +39,13 @@ export type UseResourceResult<TRequest extends Request> = [
   RequestDispatcher<TRequest>,
 ];
 
-export type UseResourceOptions<T = any> = Pick<
-  RequestContextConfig<T>,
+export type UseResourceOptions<T extends Request> = Pick<
+  RequestContextConfig<Payload<T>>,
   "cache" | "cacheFilter"
 > & {
   cacheKey?: CacheKey | CacheKeyFn<T>;
+  /** Conditional Fetching */
+  filter?: (...args: Parameters<T>) => boolean;
 };
 
 type Action<T> =
@@ -66,7 +68,7 @@ function getNextState<TRequest extends Request>(
 export function useResource<TRequest extends Request>(
   fn: TRequest,
   requestParams?: Parameters<TRequest>,
-  options?: UseResourceOptions<Payload<TRequest>>,
+  options?: UseResourceOptions<TRequest>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig =
@@ -152,12 +154,22 @@ export function useResource<TRequest extends Request>(
   useEffect(() => {
     requestRefFn.current = request;
   }, [request]);
+  const filterRefFn = useRef(options?.filter);
+  useEffect(() => {
+    filterRefFn.current = options?.filter;
+  }, [options?.filter]);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     let canceller: Canceler = () => {};
     if (requestParams) {
-      canceller = requestRefFn.current(...requestParams);
+      const filter =
+        typeof filterRefFn.current === "function"
+          ? filterRefFn.current(...requestParams)
+          : true;
+      if (filter) {
+        canceller = requestRefFn.current(...requestParams);
+      }
     }
     return canceller;
     // eslint-disable-next-line react-hooks/exhaustive-deps

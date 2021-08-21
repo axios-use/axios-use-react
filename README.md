@@ -97,13 +97,14 @@ useEffect(() => {
 
 ### useResource
 
-| option              | type                        | explain                                             |
-| ------------------- | --------------------------- | --------------------------------------------------- |
-| fn                  | function                    | get AxiosRequestConfig function                     |
-| parameters          | array                       | `fn` function parameters. effect dependency list    |
-| options.cache       | object \| false             | Customized cache collections. Or close              |
-| options.cacheKey    | string\| number \| function | Custom cache key value                              |
-| options.cacheFilter | function                    | Callback function to decide whether to cache or not |
+| option              | type                        | explain                                                             |
+| ------------------- | --------------------------- | ------------------------------------------------------------------- |
+| fn                  | function                    | get AxiosRequestConfig function                                     |
+| parameters          | array                       | `fn` function parameters. effect dependency list                    |
+| options.cache       | object \| false             | Customized cache collections. Or close                              |
+| options.cacheKey    | string\| number \| function | Custom cache key value                                              |
+| options.cacheFilter | function                    | Callback function to decide whether to cache or not                 |
+| options.filter      | function                    | Request filter. if return a falsy value, will not start the request |
 
 ```tsx
 // js
@@ -140,12 +141,14 @@ type Fetch = (...args: Parameters<TRequest>) => Canceler;
 The request can also be triggered passing its arguments as dependencies to the _useResource_ hook.
 
 ```jsx
+const [userId, setUserId] = useState();
+
 const [reqState] = useResource(
   (id) => ({
     url: `/user/${id}`,
     method: "GET",
   }),
-  [id],
+  [userId],
 );
 
 // no parameters
@@ -156,6 +159,20 @@ const [reqState] = useResource(
   }),
   [],
 );
+
+// conditional
+const [reqState, request] = useResource(
+  (id) => ({
+    url: `/user/${id}`,
+    method: "GET",
+  }),
+  [userId],
+  {
+    filter: (id) => id !== "12345",
+  },
+);
+
+request("12345"); // custom request is still useful
 ```
 
 #### cache

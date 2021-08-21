@@ -206,6 +206,66 @@ describe("useResource", () => {
     unmount();
     expect(result.current[0].data).toStrictEqual([3]);
   });
+
+  it("options: filter", async () => {
+    const { result, rerender, waitForNextUpdate } = renderHook(
+      (props: number[]) =>
+        useResource(
+          (...args: number[]) => ({
+            url: "/params",
+            method: "GET",
+            params: args,
+          }),
+          props,
+          {
+            filter: (a, b) => a !== b,
+          },
+        ),
+      {
+        initialProps: [1],
+      },
+    );
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([1]);
+    expect(result.current[0].error).toBeUndefined();
+
+    rerender([1, 2]);
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toStrictEqual([1]);
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([1, 2]);
+    expect(result.current[0].error).toBeUndefined();
+
+    rerender([2, 2]);
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([1, 2]);
+    expect(result.current[0].error).toBeUndefined();
+
+    void act(() => {
+      result.current[1](3, 3);
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toStrictEqual([1, 2]);
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([3, 3]);
+    expect(result.current[0].error).toBeUndefined();
+  });
 });
 
 describe("useResource - cache", () => {
