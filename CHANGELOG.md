@@ -1,3 +1,25 @@
+## [4.1.0](https://github.com/react-cmpt/react-request-hook/compare/v4.0.0...v4.1.0) (2021-08-23)
+
+
+### Features
+
+* **useResource:** options `filter`. if return a falsy value, will not start the request. ([#3](https://github.com/react-cmpt/react-request-hook/pull/3))
+  ```tsx
+  filter?: (...args: Parameters<T>) => boolean;
+  ```
+* **UseResourceOptions** genericity ([b2b0501](https://github.com/react-cmpt/react-request-hook/commits/b2b05016f12f14773bd87fa519f808604fdbbda6))
+  ```diff
+  - UseResourceOptions<Payload<TRequest>>
+  + UseResourceOptions<TRequest>
+  ```
+
+
+### Chore
+
+Upgrade devDependencies.([ea41057](https://github.com/react-cmpt/react-request-hook/commit/ea41057b8e626dcdc18c7961e4a9f2f9737cc7d8), [bf6fb89](https://github.com/react-cmpt/react-request-hook/commit/bf6fb890bebd9ab36de7f110811e796e7912414d))
+
+
+
 # [4.0.0](https://github.com/react-cmpt/react-request-hook/compare/v3.0.0...v4.0.0) (2021-06-02)
 
 

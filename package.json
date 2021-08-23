@@ -1,6 +1,6 @@
 {
   "name": "@react-cmpt/react-request-hook",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Managed request calls made easy by React Hooks",
   "contributors": [
     "Matheus Schettino <schettino2@gmail.com>",
