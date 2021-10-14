@@ -29,6 +29,14 @@
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn"
   },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unsafe-argument": "off"
+      }
+    }
+  ],
   "settings": {
     "react": {
       "pragma": "React",

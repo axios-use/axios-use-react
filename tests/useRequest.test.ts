@@ -128,8 +128,7 @@ describe("useRequest", () => {
       try {
         result.current[0]();
       } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        expect(error?.message).toEqual(
+        expect((error as Error)?.message).toEqual(
           "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>",
         );
       }
