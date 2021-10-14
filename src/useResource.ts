@@ -14,6 +14,7 @@ import type {
   Request,
   RequestDispatcher,
   AxiosRestResponse,
+  Resource,
 } from "./request";
 import type {
   RequestContextValue,
@@ -74,7 +75,9 @@ export function useResource<TRequest extends Request>(
   const RequestConfig =
     useContext<RequestContextValue<Payload<TRequest>>>(RequestContext);
 
-  const fnOptions = useDeepMemo(fn(...(requestParams || [])));
+  const fnOptions = useDeepMemo(
+    fn(...(requestParams || [])) as Resource<Payload<TRequest>>,
+  );
   const requestCache = useMemo(() => {
     const filter = options?.cacheFilter || RequestConfig?.cacheFilter;
     if (filter && typeof filter === "function") {

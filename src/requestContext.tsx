@@ -25,7 +25,7 @@ const defaultConfig: RequestContextConfig = {
 export const RequestContext = createContext<RequestContextValue>(defaultConfig);
 RequestContext.displayName = "RequestHookConfig";
 
-export const RequestProvider = <T extends unknown>(
+export const RequestProvider = <T,>(
   props: PropsWithChildren<RequestContextConfig<T>>,
 ) => {
   const { children, instance, cache, cacheKey, cacheFilter, ...rest } = props;
