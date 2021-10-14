@@ -5,7 +5,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "strict": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "lib": ["dom", "es5", "es2015"],
     "outDir": "./lib",
     "declaration": true
