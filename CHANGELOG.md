@@ -1,3 +1,22 @@
+## [4.2.0](https://github.com/react-cmpt/react-request-hook/compare/v4.1.0...v4.2.0) (2021-10-15)
+
+
+### Bug Fixes
+
+* Unsafe argument of type. ([f41e627](https://github.com/react-cmpt/react-request-hook/commit/f41e627dd18d43e99c557e8008ef946b1b239a0c))
+
+
+### Building
+
+* Support react version < 17. tsconfig.compilerOptions.jsx `react-jsx` -> `react`. ([60a762e](https://github.com/react-cmpt/react-request-hook/commit/60a762e95b2d5cd7fab9575b2c543bd80784eaca))
+
+
+### Chore
+
+* Upgrade devDependencies. ([74ba658](https://github.com/react-cmpt/react-request-hook/commit/74ba658208953640a41df78ac29d5473faf8124e), [ef26c9e](https://github.com/react-cmpt/react-request-hook/commit/ef26c9ec0f641528a4b06ddd19e6e84c3fc9e871), [fb082ad](https://github.com/react-cmpt/react-request-hook/commit/fb082ad47790b1867c32eda5c90505d59107b8b2))
+
+
+
 ## [4.1.0](https://github.com/react-cmpt/react-request-hook/compare/v4.0.0...v4.1.0) (2021-08-23)
 
 
@@ -16,7 +35,7 @@
 
 ### Chore
 
-Upgrade devDependencies.([ea41057](https://github.com/react-cmpt/react-request-hook/commit/ea41057b8e626dcdc18c7961e4a9f2f9737cc7d8), [bf6fb89](https://github.com/react-cmpt/react-request-hook/commit/bf6fb890bebd9ab36de7f110811e796e7912414d))
+* Upgrade devDependencies.([ea41057](https://github.com/react-cmpt/react-request-hook/commit/ea41057b8e626dcdc18c7961e4a9f2f9737cc7d8), [bf6fb89](https://github.com/react-cmpt/react-request-hook/commit/bf6fb890bebd9ab36de7f110811e796e7912414d))
 
 
 
