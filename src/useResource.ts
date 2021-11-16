@@ -10,6 +10,7 @@ import type { Canceler } from "axios";
 import { useRequest } from "./useRequest";
 import type {
   Payload,
+  CData,
   RequestError,
   Request,
   RequestDispatcher,
@@ -30,8 +31,8 @@ const REQUEST_CLEAR_MESSAGE =
 
 type RequestState<TRequest extends Request> = {
   data?: Payload<TRequest>;
-  other?: AxiosRestResponse;
-  error?: RequestError<Payload<TRequest>>;
+  other?: AxiosRestResponse<CData<TRequest>>;
+  error?: RequestError<Payload<TRequest>, CData<TRequest>>;
   isLoading: boolean;
 };
 
@@ -49,14 +50,14 @@ export type UseResourceOptions<T extends Request> = Pick<
   filter?: (...args: Parameters<T>) => boolean;
 };
 
-type Action<T> =
-  | { type: "success"; data: T; other: AxiosRestResponse }
-  | { type: "error"; error: RequestError<T> }
+type Action<T, D = any> =
+  | { type: "success"; data: T; other: AxiosRestResponse<D> }
+  | { type: "error"; error: RequestError<T, D> }
   | { type: "reset" | "start" };
 
 function getNextState<TRequest extends Request>(
   state: RequestState<TRequest>,
-  action: Action<Payload<TRequest>>,
+  action: Action<Payload<TRequest>, CData<TRequest>>,
 ): RequestState<TRequest> {
   return {
     data: action.type === "success" ? action.data : state.data,
@@ -76,7 +77,10 @@ export function useResource<TRequest extends Request>(
     useContext<RequestContextValue<Payload<TRequest>>>(RequestContext);
 
   const fnOptions = useDeepMemo(
-    fn(...(requestParams || [])) as Resource<Payload<TRequest>>,
+    fn(...(requestParams || [])) as Resource<
+      Payload<TRequest>,
+      CData<TRequest>
+    >,
   );
   const requestCache = useMemo(() => {
     const filter = options?.cacheFilter || RequestConfig?.cacheFilter;
@@ -140,7 +144,7 @@ export function useResource<TRequest extends Request>(
               requestCache.set(cacheKey, data);
           }
         } catch (e) {
-          const error = e as RequestError<Payload<TRequest>>;
+          const error = e as RequestError<Payload<TRequest>, CData<TRequest>>;
           if (getMountedState() && !error.isCancel) {
             dispatch({ type: "error", error });
           }
