@@ -6,7 +6,10 @@ import type {
 } from "axios";
 import axios from "axios";
 
-export type AxiosRestResponse<D> = Omit<AxiosResponse<unknown, D>, "data">;
+export type AxiosRestResponse<D = any> = Omit<
+  AxiosResponse<unknown, D>,
+  "data"
+>;
 
 export interface Resource<TPayload, D = any> extends AxiosRequestConfig<D> {
   payload?: TPayload;
@@ -31,7 +34,7 @@ export interface RequestDispatcher<TRequest extends Request> {
 }
 
 // Normalize the error response returned from our hooks
-export interface RequestError<T, D = any> {
+export interface RequestError<T = any, D = any> {
   data?: T;
   message: string;
   code?: string | number;
