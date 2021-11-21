@@ -1,8 +1,8 @@
 import type { Resource } from "./request";
 
 export type CacheKey = string | number;
-export type CacheKeyFn<T = any> = (config: Resource<T>) => CacheKey;
-export type CacheFilter<T = any> = (config: Resource<T>) => boolean;
+export type CacheKeyFn<T = any, D = any> = (config: Resource<T, D>) => CacheKey;
+export type CacheFilter<T = any, D = any> = (config: Resource<T, D>) => boolean;
 
 export interface Cache<T = any> {
   get(key: CacheKey): T | null | undefined;
@@ -11,7 +11,9 @@ export interface Cache<T = any> {
   clear(): void;
 }
 
-export function createCacheKey<T = any>(config: Resource<T>): CacheKey {
+export function createCacheKey<T = any, D = any>(
+  config: Resource<T, D>,
+): CacheKey {
   return JSON.stringify(config, [
     "url",
     "method",

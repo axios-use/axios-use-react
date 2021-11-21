@@ -11,6 +11,7 @@ import type {
   RequestFactory,
   Request,
   Payload,
+  CData,
   AxiosRestResponse,
 } from "./request";
 import { createRequestError } from "./request";
@@ -69,15 +70,19 @@ export function useRequest<TRequest extends Request>(
           setSources((prevSources) => [...prevSources, source]);
         }
         return axiosInstance({ ...config, cancelToken: source.token })
-          .then((response: AxiosResponse<Payload<TRequest>>) => {
-            removeCancelToken(source.token);
-            const { data, ...restResponse } = response;
-            return [data, restResponse];
-          })
-          .catch((error: AxiosError<Payload<TRequest>>) => {
+          .then(
+            (response: AxiosResponse<Payload<TRequest>, CData<TRequest>>) => {
+              removeCancelToken(source.token);
+              const { data, ...restResponse } = response;
+              return [data, restResponse];
+            },
+          )
+          .catch((error: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
             removeCancelToken(source.token);
             throw createRequestError(error);
-          }) as Promise<[Payload<TRequest>, AxiosRestResponse]>;
+          }) as Promise<
+          [Payload<TRequest>, AxiosRestResponse<CData<TRequest>>]
+        >;
       };
 
       return {

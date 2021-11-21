@@ -6,20 +6,26 @@ import type {
 } from "axios";
 import axios from "axios";
 
-export type AxiosRestResponse = Omit<AxiosResponse, "data">;
+export type AxiosRestResponse<D = any> = Omit<
+  AxiosResponse<unknown, D>,
+  "data"
+>;
 
-export interface Resource<TPayload> extends AxiosRequestConfig {
+export interface Resource<TPayload, D = any> extends AxiosRequestConfig<D> {
   payload?: TPayload;
 }
 
-export type Request<T = any> = (...args: any[]) => Resource<T>;
+export type Request<T = any, D = any> = (...args: any[]) => Resource<T, D>;
 
 export type Payload<TRequest extends Request> = ReturnType<TRequest>["payload"];
+export type CData<TRequest extends Request> = ReturnType<TRequest>["data"];
 
 export interface RequestFactory<TRequest extends Request> {
   (...args: Parameters<TRequest>): {
     cancel: Canceler;
-    ready: () => Promise<[Payload<TRequest>, AxiosRestResponse]>;
+    ready: () => Promise<
+      [Payload<TRequest>, AxiosRestResponse<CData<TRequest>>]
+    >;
   };
 }
 
@@ -28,21 +34,23 @@ export interface RequestDispatcher<TRequest extends Request> {
 }
 
 // Normalize the error response returned from our hooks
-export interface RequestError<T> {
+export interface RequestError<T = any, D = any> {
   data?: T;
   message: string;
   code?: string | number;
   isCancel: boolean;
-  original: AxiosError<T>;
+  original: AxiosError<T, D>;
 }
 
-export function request<T>(config: AxiosRequestConfig): Resource<T> {
+export function request<T, D = any>(
+  config: AxiosRequestConfig<D>,
+): Resource<T, D> {
   return config;
 }
 
-export function createRequestError<T = any>(
-  error: AxiosError<T>,
-): RequestError<T> {
+export function createRequestError<T = any, D = any>(
+  error: AxiosError<T, D>,
+): RequestError<T, D> {
   const data = error?.response?.data;
   const code =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
