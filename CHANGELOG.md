@@ -1,3 +1,12 @@
+## [4.3.0](https://github.com/react-cmpt/react-request-hook/compare/v4.2.0...v4.3.0) (2021-11-24)
+
+
+### Features
+
+* Type: keep AxiosRequestConfig generics. ([#4](https://github.com/react-cmpt/react-request-hook/pull/4))
+
+
+
 ## [4.2.0](https://github.com/react-cmpt/react-request-hook/compare/v4.1.0...v4.2.0) (2021-10-15)
 
 
