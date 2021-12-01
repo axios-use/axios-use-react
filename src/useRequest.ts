@@ -35,8 +35,8 @@ export function useRequest<TRequest extends Request>(
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
-  const axiosInstance = RequestConfig?.instance;
-  const customCreateReqError = RequestConfig?.customCreateReqError;
+  const axiosInstance = RequestConfig.instance;
+  const customCreateReqError = RequestConfig.customCreateReqError;
 
   if (!axiosInstance) {
     throw new Error(REQUEST_AXIOS_INSTANCE_MESSAGE);

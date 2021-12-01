@@ -15,10 +15,7 @@ export type RequestContextConfig<T = any, E = any> = {
   customCreateReqError?: (err: any) => RequestError<T, any, E>;
 };
 
-export type RequestContextValue<T = any, E = any> = RequestContextConfig<
-  T,
-  E
-> | null;
+export type RequestContextValue<T = any, E = any> = RequestContextConfig<T, E>;
 
 const cache = wrapCache(new Map());
 

@@ -83,10 +83,10 @@ export function useResource<TRequest extends Request>(
     >,
   );
   const requestCache = useMemo(() => {
-    const filter = options?.cacheFilter || RequestConfig?.cacheFilter;
+    const filter = options?.cacheFilter || RequestConfig.cacheFilter;
     if (filter && typeof filter === "function") {
       if (filter(fnOptions)) {
-        return options?.cache ?? RequestConfig?.cache;
+        return options?.cache ?? RequestConfig.cache;
       }
       return undefined;
     }
@@ -96,12 +96,12 @@ export function useResource<TRequest extends Request>(
       fnOptions?.method === undefined ||
       /^get$/i.test(fnOptions.method)
     ) {
-      return options?.cache ?? RequestConfig?.cache;
+      return options?.cache ?? RequestConfig.cache;
     }
     return undefined;
   }, [
-    RequestConfig?.cache,
-    RequestConfig?.cacheFilter,
+    RequestConfig.cache,
+    RequestConfig.cacheFilter,
     fnOptions,
     options?.cache,
     options?.cacheFilter,
@@ -110,10 +110,10 @@ export function useResource<TRequest extends Request>(
     return (
       (requestCache &&
         (getStrByFn(options?.cacheKey, fnOptions) ??
-          getStrByFn(RequestConfig?.cacheKey, fnOptions))) ||
+          getStrByFn(RequestConfig.cacheKey, fnOptions))) ||
       undefined
     );
-  }, [RequestConfig?.cacheKey, fnOptions, options?.cacheKey, requestCache]);
+  }, [RequestConfig.cacheKey, fnOptions, options?.cacheKey, requestCache]);
   const cacheData = useMemo(() => {
     return requestCache && cacheKey && typeof requestCache.get === "function"
       ? requestCache.get(cacheKey) ?? undefined
