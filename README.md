@@ -37,12 +37,13 @@ ReactDOM.render(
 
 #### config
 
-| config      | type            | explain                                                    |
-| ----------- | --------------- | ---------------------------------------------------------- |
-| instance    | object          | axios instance                                             |
-| cache       | object \| false | Customized cache collections. Or close. (**Default on**)   |
-| cacheKey    | function        | Global custom formatted cache keys                         |
-| cacheFilter | function        | Global callback function to decide whether to cache or not |
+| config               | type            | explain                                                    |
+| -------------------- | --------------- | ---------------------------------------------------------- |
+| instance             | object          | axios instance                                             |
+| cache                | object \| false | Customized cache collections. Or close. (**Default on**)   |
+| cacheKey             | function        | Global custom formatted cache keys                         |
+| cacheFilter          | function        | Global callback function to decide whether to cache or not |
+| customCreateReqError | function        | Custom format error data                                   |
 
 ### useRequest
 
