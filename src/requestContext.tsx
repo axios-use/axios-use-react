@@ -3,17 +3,22 @@ import type { PropsWithChildren } from "react";
 import { createContext } from "react";
 import type { AxiosInstance } from "axios";
 
+import type { RequestError } from "./request";
 import type { Cache, CacheKeyFn, CacheFilter } from "./cache";
 import { createCacheKey, wrapCache } from "./cache";
 
-export type RequestContextConfig<T = any> = {
+export type RequestContextConfig<T = any, E = any> = {
   instance?: AxiosInstance;
   cache?: Cache<T> | false;
   cacheKey?: CacheKeyFn<T>;
   cacheFilter?: CacheFilter<T>;
+  customCreateReqError?: (err: any) => RequestError<T, any, E>;
 };
 
-export type RequestContextValue<T = any> = RequestContextConfig<T> | null;
+export type RequestContextValue<T = any, E = any> = RequestContextConfig<
+  T,
+  E
+> | null;
 
 const cache = wrapCache(new Map());
 
@@ -28,7 +33,15 @@ RequestContext.displayName = "RequestHookConfig";
 export const RequestProvider = <T,>(
   props: PropsWithChildren<RequestContextConfig<T>>,
 ) => {
-  const { children, instance, cache, cacheKey, cacheFilter, ...rest } = props;
+  const {
+    children,
+    instance,
+    cache,
+    cacheKey,
+    cacheFilter,
+    customCreateReqError,
+    ...rest
+  } = props;
 
   return (
     <RequestContext.Provider
@@ -37,6 +50,7 @@ export const RequestProvider = <T,>(
         cache,
         cacheKey,
         cacheFilter,
+        customCreateReqError,
       }}
       {...rest}>
       {children}
