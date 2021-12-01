@@ -1,3 +1,4 @@
+import type { AxiosError } from "axios";
 import {
   renderHook,
   originalRenderHook,
@@ -49,9 +50,10 @@ describe("useRequest", () => {
       try {
         await result.current[0]().ready();
       } catch (e) {
-        const error = e as RequestError<typeof errResponse>;
+        const error = e as RequestError<typeof errResponse, any, AxiosError>;
         expect(error.data).toStrictEqual(errResponse);
         expect(error.code).toStrictEqual(errResponse.code);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(error.original?.response?.status).toStrictEqual(400);
       }
     });

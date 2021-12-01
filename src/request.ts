@@ -34,12 +34,16 @@ export interface RequestDispatcher<TRequest extends Request> {
 }
 
 // Normalize the error response returned from our hooks
-export interface RequestError<T = any, D = any> {
+export interface RequestError<
+  T = any,
+  D = any,
+  E = AxiosError<T, D> | AxiosResponse<T, D>,
+> {
   data?: T;
   message: string;
   code?: string | number;
   isCancel: boolean;
-  original: AxiosError<T, D>;
+  original: E;
 }
 
 export function request<T, D = any>(
@@ -48,18 +52,29 @@ export function request<T, D = any>(
   return config;
 }
 
-export function createRequestError<T = any, D = any>(
-  error: AxiosError<T, D>,
-): RequestError<T, D> {
-  const data = error?.response?.data;
+export function createRequestError<
+  T = any,
+  D = any,
+  E = AxiosError<T, D> | AxiosResponse<T, D>,
+>(error: E): RequestError<T, D, E> {
+  const axiosErr = error as unknown as AxiosError<T, D>;
+  const axiosRes = error as unknown as AxiosResponse<T, D>;
+
+  const data = axiosErr?.response?.data || axiosRes?.data;
   const code =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ((data as any)?.code as string) || error?.code || error?.response?.status;
+    ((data as any)?.code as string) ||
+    axiosErr?.code ||
+    axiosErr?.response?.status ||
+    axiosRes?.status;
+
+  const message =
+    axiosErr?.message || axiosErr?.response?.statusText || axiosRes?.statusText;
 
   return {
     code,
     data,
-    message: error?.message,
+    message,
     isCancel: axios.isCancel(error),
     original: error,
   };
