@@ -35,6 +35,20 @@ export function useDeepMemo<T>(value: T): T {
 }
 
 /**
+ * useRefFn
+ * @param fn
+ */
+export function useRefFn<T = (...args: any) => any>(fn: T) {
+  const refFn = useRef(fn);
+
+  useEffect(() => {
+    refFn.current = fn;
+  }, [fn]);
+
+  return refFn;
+}
+
+/**
  *
  * @param strOrFn
  * @param args
