@@ -1,11 +1,4 @@
-import {
-  useEffect,
-  useCallback,
-  useContext,
-  useReducer,
-  useMemo,
-  useRef,
-} from "react";
+import { useEffect, useCallback, useContext, useReducer, useMemo } from "react";
 import type { Canceler } from "axios";
 import { useRequest } from "./useRequest";
 import type {
@@ -24,7 +17,7 @@ import type {
 import { RequestContext } from "./requestContext";
 import type { CacheKey, CacheKeyFn } from "./cache";
 
-import { useDeepMemo, useMountedState, getStrByFn } from "./utils";
+import { useDeepMemo, useMountedState, useRefFn, getStrByFn } from "./utils";
 
 const REQUEST_CLEAR_MESSAGE =
   "A new request has been made before completing the last one";
@@ -157,14 +150,8 @@ export function useResource<TRequest extends Request>(
     [cacheKey, clear, createRequest, getMountedState],
   );
 
-  const requestRefFn = useRef(request);
-  useEffect(() => {
-    requestRefFn.current = request;
-  }, [request]);
-  const filterRefFn = useRef(options?.filter);
-  useEffect(() => {
-    filterRefFn.current = options?.filter;
-  }, [options?.filter]);
+  const requestRefFn = useRefFn(request);
+  const filterRefFn = useRefFn(options?.filter);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function

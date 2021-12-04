@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext, useRef, useEffect } from "react";
+import { useState, useCallback, useContext, useEffect } from "react";
 import type {
   AxiosError,
   CancelTokenSource,
@@ -17,7 +17,7 @@ import type {
 import { createRequestError } from "./request";
 import { RequestContext } from "./requestContext";
 
-import { useMountedState } from "./utils";
+import { useMountedState, useRefFn } from "./utils";
 
 const REQUEST_AXIOS_INSTANCE_MESSAGE =
   "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>";
@@ -56,10 +56,7 @@ export function useRequest<TRequest extends Request>(
     [getMountedState],
   );
 
-  const callFn = useRef(fn);
-  useEffect(() => {
-    callFn.current = fn;
-  }, [fn]);
+  const callFn = useRefFn(fn);
 
   const request = useCallback(
     (...args: Parameters<TRequest>) => {
@@ -96,6 +93,7 @@ export function useRequest<TRequest extends Request>(
         cancel: source.cancel,
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [axiosInstance, customCreateReqError, getMountedState, removeCancelToken],
   );
 
@@ -111,18 +109,17 @@ export function useRequest<TRequest extends Request>(
     [getMountedState, sources],
   );
 
-  const clearRef = useRef(clear);
-  useEffect(() => {
-    clearRef.current = clear;
-  });
+  const clearRef = useRefFn(clear);
 
   const rtnClearFn = useCallback(
     (message?: string) => clearRef.current(message),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
   useEffect(() => {
     return clearRef.current;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return [request, { clear: rtnClearFn, hasPending }];
