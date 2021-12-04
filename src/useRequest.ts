@@ -35,7 +35,8 @@ export function useRequest<TRequest extends Request>(
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
-  const axiosInstance = RequestConfig?.instance;
+  const axiosInstance = RequestConfig.instance;
+  const customCreateReqError = RequestConfig.customCreateReqError;
 
   if (!axiosInstance) {
     throw new Error(REQUEST_AXIOS_INSTANCE_MESSAGE);
@@ -79,7 +80,12 @@ export function useRequest<TRequest extends Request>(
           )
           .catch((error: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
             removeCancelToken(source.token);
-            throw createRequestError(error);
+
+            if (customCreateReqError) {
+              throw customCreateReqError(error);
+            } else {
+              throw createRequestError(error);
+            }
           }) as Promise<
           [Payload<TRequest>, AxiosRestResponse<CData<TRequest>>]
         >;
@@ -90,7 +96,7 @@ export function useRequest<TRequest extends Request>(
         cancel: source.cancel,
       };
     },
-    [axiosInstance, getMountedState, removeCancelToken],
+    [axiosInstance, customCreateReqError, getMountedState, removeCancelToken],
   );
 
   const clear = useCallback(

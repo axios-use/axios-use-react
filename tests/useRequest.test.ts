@@ -1,9 +1,11 @@
+import type { AxiosError } from "axios";
 import {
   renderHook,
   originalRenderHook,
   mockAdapter,
   act,
   cache,
+  axios,
 } from "./utils";
 
 import type { RequestError } from "../src";
@@ -11,11 +13,13 @@ import { useRequest } from "../src";
 
 const okResponse = { code: 0, data: [1, 2], message: null };
 const errResponse = { code: 2001, data: [3, 4], message: "some error" };
+const errResponse2 = { code: 2001, data: [3, 4], msg: "some error" };
 
 describe("useRequest", () => {
   beforeAll(() => {
     mockAdapter.onGet("/users").reply(200, okResponse);
     mockAdapter.onGet("/400").reply(400, errResponse);
+    mockAdapter.onGet("/err").reply(400, errResponse2);
   });
 
   beforeEach(() => {
@@ -49,9 +53,10 @@ describe("useRequest", () => {
       try {
         await result.current[0]().ready();
       } catch (e) {
-        const error = e as RequestError<typeof errResponse>;
+        const error = e as RequestError<typeof errResponse, any, AxiosError>;
         expect(error.data).toStrictEqual(errResponse);
         expect(error.code).toStrictEqual(errResponse.code);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         expect(error.original?.response?.status).toStrictEqual(400);
       }
     });
@@ -131,6 +136,33 @@ describe("useRequest", () => {
         expect((error as Error)?.message).toEqual(
           "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>",
         );
+      }
+    });
+  });
+
+  it("customCreateReqError", async () => {
+    const { result } = renderHook(
+      () => useRequest(() => ({ url: "/err", method: "GET" })),
+      {
+        customCreateReqError: (err: AxiosError<typeof errResponse2>) => ({
+          code: err?.response?.data?.code,
+          data: err?.response?.data,
+          message: err?.response?.data?.msg || "",
+          isCancel: axios.isCancel(err),
+          original: err,
+        }),
+      },
+    );
+
+    await act(async () => {
+      try {
+        await result.current[0]().ready();
+      } catch (e) {
+        const error = e as RequestError<typeof errResponse2, any, AxiosError>;
+        expect(error.data).toStrictEqual(errResponse2);
+        expect(error.code).toStrictEqual(errResponse2.code);
+        expect(error.message).toStrictEqual(errResponse2.msg);
+        expect(error.original?.response?.status).toStrictEqual(400);
       }
     });
   });

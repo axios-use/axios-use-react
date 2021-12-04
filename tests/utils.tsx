@@ -13,24 +13,29 @@ const mockAdapter = new MockAdapter(axios);
 
 export const cache = wrapCache(new Map());
 
-const AllTheProviders: FC<{ cache?: RequestContextConfig["cache"] }> = (
-  props,
-) => (
-  <RequestProvider instance={axios} cache={props.cache ?? cache}>
+const AllTheProviders: FC<Omit<RequestContextConfig, "instance">> = (props) => (
+  <RequestProvider instance={axios} {...props} cache={props.cache ?? cache}>
     {props.children}
   </RequestProvider>
 );
 
 function customRenderHook<P, R>(
   callback: (props: P) => R,
-  options?: RenderHookOptions<P> & {
-    cache?: RequestContextConfig["cache"];
-  },
+  options?: RenderHookOptions<P> & RequestContextConfig,
 ) {
-  const { cache, ...rest } = options || {};
+  const { cache, cacheKey, cacheFilter, customCreateReqError, ...rest } =
+    options || {};
   return renderHook<P, R>(callback, {
     // eslint-disable-next-line react/display-name
-    wrapper: (props) => <AllTheProviders cache={cache} {...props} />,
+    wrapper: (props) => (
+      <AllTheProviders
+        cache={cache}
+        cacheKey={cacheKey}
+        cacheFilter={cacheFilter}
+        customCreateReqError={customCreateReqError}
+        {...props}
+      />
+    ),
     ...rest,
   });
 }
