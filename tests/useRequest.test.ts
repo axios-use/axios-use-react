@@ -166,4 +166,54 @@ describe("useRequest", () => {
       }
     });
   });
+
+  it("options: onCompleted", async () => {
+    const onCompleted = jest.fn();
+    const onError = jest.fn();
+    const { result } = renderHook(() =>
+      useRequest(() => ({ url: "/users", method: "GET" }), {
+        onCompleted,
+        onError,
+      }),
+    );
+
+    await act(async () => {
+      expect(onCompleted).toHaveBeenCalledTimes(0);
+      expect(onError).toHaveBeenCalledTimes(0);
+
+      const [data, other] = await result.current[0]().ready();
+      expect(data).toStrictEqual(okResponse);
+
+      expect(onCompleted).toHaveBeenCalledTimes(1);
+      expect(onCompleted).toHaveBeenCalledWith(data, other);
+      expect(onError).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  it("options: onError", async () => {
+    const onCompleted = jest.fn();
+    const onError = jest.fn();
+    const { result } = renderHook(() =>
+      useRequest(() => ({ url: "/400", method: "GET" }), {
+        onCompleted,
+        onError,
+      }),
+    );
+
+    await act(async () => {
+      expect(onCompleted).toHaveBeenCalledTimes(0);
+      expect(onError).toHaveBeenCalledTimes(0);
+
+      try {
+        await result.current[0]().ready();
+      } catch (e) {
+        const error = e as RequestError<typeof errResponse, any, AxiosError>;
+        expect(error.data).toStrictEqual(errResponse);
+
+        expect(onCompleted).toHaveBeenCalledTimes(0);
+        expect(onError).toHaveBeenCalledTimes(1);
+        expect(onError).toHaveBeenCalledWith(error);
+      }
+    });
+  });
 });

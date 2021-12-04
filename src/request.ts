@@ -46,6 +46,14 @@ export interface RequestError<
   original: E;
 }
 
+export type RequestCallbackFn<TRequest extends Request> = {
+  onCompleted?: (
+    data?: Payload<TRequest>,
+    other?: AxiosRestResponse<CData<TRequest>>,
+  ) => void;
+  onError?: (err?: RequestError<Payload<TRequest>, CData<TRequest>>) => void;
+};
+
 export function request<T, D = any>(
   config: AxiosRequestConfig<D>,
 ): Resource<T, D> {

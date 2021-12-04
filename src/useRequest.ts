@@ -9,6 +9,7 @@ import type {
 import axios from "axios";
 import type {
   RequestFactory,
+  RequestCallbackFn,
   Request,
   Payload,
   CData,
@@ -22,6 +23,9 @@ import { useMountedState, useRefFn } from "./utils";
 const REQUEST_AXIOS_INSTANCE_MESSAGE =
   "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>";
 
+export type UseRequestOptions<TRequest extends Request> =
+  RequestCallbackFn<TRequest>;
+
 export type UseRequestResult<TRequest extends Request> = [
   RequestFactory<TRequest>,
   {
@@ -32,6 +36,7 @@ export type UseRequestResult<TRequest extends Request> = [
 
 export function useRequest<TRequest extends Request>(
   fn: TRequest,
+  options?: UseRequestOptions<TRequest>,
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
@@ -56,6 +61,10 @@ export function useRequest<TRequest extends Request>(
     [getMountedState],
   );
 
+  const { onCompleted, onError } = options || {};
+  const onCompletedRef = useRefFn(onCompleted);
+  const onErrorRef = useRefFn(onError);
+
   const callFn = useRefFn(fn);
 
   const request = useCallback(
@@ -72,17 +81,21 @@ export function useRequest<TRequest extends Request>(
             (response: AxiosResponse<Payload<TRequest>, CData<TRequest>>) => {
               removeCancelToken(source.token);
               const { data, ...restResponse } = response;
+
+              onCompletedRef.current?.(data, restResponse);
               return [data, restResponse];
             },
           )
-          .catch((error: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
+          .catch((err: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
             removeCancelToken(source.token);
 
-            if (customCreateReqError) {
-              throw customCreateReqError(error);
-            } else {
-              throw createRequestError(error);
-            }
+            const error = customCreateReqError
+              ? customCreateReqError(err)
+              : createRequestError(err);
+
+            onErrorRef.current?.(error);
+
+            throw error;
           }) as Promise<
           [Payload<TRequest>, AxiosRestResponse<CData<TRequest>>]
         >;
