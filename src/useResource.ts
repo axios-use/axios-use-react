@@ -7,6 +7,7 @@ import type {
   RequestError,
   Request,
   RequestDispatcher,
+  RequestCallbackFn,
   AxiosRestResponse,
   Resource,
 } from "./request";
@@ -37,11 +38,12 @@ export type UseResourceResult<TRequest extends Request> = [
 export type UseResourceOptions<T extends Request> = Pick<
   RequestContextConfig<Payload<T>>,
   "cache" | "cacheFilter"
-> & {
-  cacheKey?: CacheKey | CacheKeyFn<T>;
-  /** Conditional Fetching */
-  filter?: (...args: Parameters<T>) => boolean;
-};
+> &
+  RequestCallbackFn<T> & {
+    cacheKey?: CacheKey | CacheKeyFn<T>;
+    /** Conditional Fetching */
+    filter?: (...args: Parameters<T>) => boolean;
+  };
 
 type Action<T, D = any> =
   | { type: "success"; data: T; other: AxiosRestResponse<D> }
@@ -113,7 +115,10 @@ export function useResource<TRequest extends Request>(
       : undefined;
   }, [cacheKey, requestCache]);
 
-  const [createRequest, { clear }] = useRequest(fn);
+  const [createRequest, { clear }] = useRequest(fn, {
+    onCompleted: options?.onCompleted,
+    onError: options?.onError,
+  });
   const [state, dispatch] = useReducer(getNextState, {
     data: cacheData,
     isLoading: Boolean(requestParams),
