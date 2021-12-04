@@ -47,9 +47,11 @@ ReactDOM.render(
 
 ### useRequest
 
-| option | type     | explain                         |
-| ------ | -------- | ------------------------------- |
-| fn     | function | get AxiosRequestConfig function |
+| option              | type     | explain                                          |
+| ------------------- | -------- | ------------------------------------------------ |
+| fn                  | function | get AxiosRequestConfig function                  |
+| options.onCompleted | function | This function is passed the query's result data. |
+| options.onError     | function | This function is passed an `RequestError` object |
 
 ```tsx
 // js
@@ -96,6 +98,20 @@ useEffect(() => {
 }, [id]);
 ```
 
+```tsx
+// options: onCompleted, onError
+const [createRequest, { hasPending, cancel }] = useRequest(
+  (id) => ({
+    url: `/user/${id}`,
+    method: "GET",
+  }),
+  {
+    onCompleted: (data, other) => console.info(data, other),
+    onError: (err) => console.info(err),
+  },
+);
+```
+
 ### useResource
 
 | option              | type                        | explain                                                             |
@@ -106,6 +122,8 @@ useEffect(() => {
 | options.cacheKey    | string\| number \| function | Custom cache key value                                              |
 | options.cacheFilter | function                    | Callback function to decide whether to cache or not                 |
 | options.filter      | function                    | Request filter. if return a falsy value, will not start the request |
+| options.onCompleted | function                    | This function is passed the query's result data.                    |
+| options.onError     | function                    | This function is passed an `RequestError` object                    |
 
 ```tsx
 // js
@@ -174,6 +192,19 @@ const [reqState, request] = useResource(
 );
 
 request("12345"); // custom request is still useful
+
+// options: onCompleted, onError
+const [reqState] = useResource(
+  () => ({
+    url: "/users/",
+    method: "GET",
+  }),
+  [],
+  {
+    onCompleted: (data, other) => console.info(data, other),
+    onError: (err) => console.info(err),
+  },
+);
 ```
 
 #### cache
