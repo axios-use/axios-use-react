@@ -266,6 +266,71 @@ describe("useResource", () => {
     expect(result.current[0].data).toStrictEqual([3, 3]);
     expect(result.current[0].error).toBeUndefined();
   });
+
+  it("options: onCompleted", async () => {
+    const onCompleted = jest.fn();
+    const onError = jest.fn();
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useResource(() => ({ url: "/users", method: "GET" }), undefined, {
+        onCompleted,
+        onError,
+      }),
+    );
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(onCompleted).toHaveBeenCalledTimes(0);
+    expect(onError).toHaveBeenCalledTimes(0);
+
+    void act(() => {
+      result.current[1]();
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(onCompleted).toHaveBeenCalledTimes(0);
+    expect(onError).toHaveBeenCalledTimes(0);
+
+    await waitForNextUpdate();
+    expect(result.current[0].data).toStrictEqual(okResponse);
+
+    expect(onCompleted).toHaveBeenCalledTimes(1);
+    expect(onCompleted).toHaveBeenCalledWith(
+      result.current[0].data,
+      result.current[0].other,
+    );
+    expect(onError).toHaveBeenCalledTimes(0);
+  });
+
+  it("options: onError", async () => {
+    const onCompleted = jest.fn();
+    const onError = jest.fn();
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useResource(() => ({ url: "/400", method: "GET" }), undefined, {
+        onCompleted,
+        onError,
+      }),
+    );
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(onCompleted).toHaveBeenCalledTimes(0);
+    expect(onError).toHaveBeenCalledTimes(0);
+
+    void act(() => {
+      result.current[1]();
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(onCompleted).toHaveBeenCalledTimes(0);
+    expect(onError).toHaveBeenCalledTimes(0);
+
+    await waitForNextUpdate();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
+    expect(result.current[0].error?.code).toBe(errResponse.code);
+    expect(result.current[0].error?.data).toStrictEqual(errResponse);
+    expect(onCompleted).toHaveBeenCalledTimes(0);
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(result.current[0].error);
+  });
 });
 
 describe("useResource - cache", () => {

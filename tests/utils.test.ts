@@ -1,6 +1,7 @@
 import { renderHook } from "@testing-library/react-hooks";
+import { useEffect } from "react";
 
-import { useMountedState, useDeepMemo, getStrByFn } from "../src";
+import { useMountedState, useDeepMemo, useRefFn, getStrByFn } from "../src";
 
 describe("useMountedState", () => {
   it("should be defined", () => {
@@ -61,6 +62,44 @@ describe("useDeepMemo", () => {
     expect(result.current).toEqual({ a: 1, b: { b1: 3 } });
 
     unmount();
+  });
+});
+
+describe("useRefFn", () => {
+  it("should be defined", () => {
+    expect(useRefFn).toBeDefined();
+  });
+
+  it("effect", () => {
+    const fn = jest.fn();
+    const fn01 = (num: number) => num;
+    const fn02 = (num: number) => num + 1;
+
+    const { result, rerender } = renderHook(
+      (props) => {
+        const ref = useRefFn(props);
+
+        useEffect(() => {
+          fn();
+          // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [ref]);
+
+        return ref;
+      },
+      {
+        initialProps: fn01,
+      },
+    );
+
+    expect(fn).toHaveBeenCalledTimes(1);
+
+    rerender();
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(result.current.current(1)).toEqual(1);
+
+    rerender(fn02);
+    expect(fn).toHaveBeenCalledTimes(1);
+    expect(result.current.current(1)).toEqual(2);
   });
 });
 

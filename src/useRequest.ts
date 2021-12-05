@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext, useRef, useEffect } from "react";
+import { useState, useCallback, useContext, useEffect } from "react";
 import type {
   AxiosError,
   CancelTokenSource,
@@ -9,6 +9,7 @@ import type {
 import axios from "axios";
 import type {
   RequestFactory,
+  RequestCallbackFn,
   Request,
   Payload,
   CData,
@@ -17,10 +18,13 @@ import type {
 import { createRequestError } from "./request";
 import { RequestContext } from "./requestContext";
 
-import { useMountedState } from "./utils";
+import { useMountedState, useRefFn } from "./utils";
 
 const REQUEST_AXIOS_INSTANCE_MESSAGE =
   "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>";
+
+export type UseRequestOptions<TRequest extends Request> =
+  RequestCallbackFn<TRequest>;
 
 export type UseRequestResult<TRequest extends Request> = [
   RequestFactory<TRequest>,
@@ -32,6 +36,7 @@ export type UseRequestResult<TRequest extends Request> = [
 
 export function useRequest<TRequest extends Request>(
   fn: TRequest,
+  options?: UseRequestOptions<TRequest>,
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
@@ -56,10 +61,11 @@ export function useRequest<TRequest extends Request>(
     [getMountedState],
   );
 
-  const callFn = useRef(fn);
-  useEffect(() => {
-    callFn.current = fn;
-  }, [fn]);
+  const { onCompleted, onError } = options || {};
+  const onCompletedRef = useRefFn(onCompleted);
+  const onErrorRef = useRefFn(onError);
+
+  const callFn = useRefFn(fn);
 
   const request = useCallback(
     (...args: Parameters<TRequest>) => {
@@ -75,17 +81,21 @@ export function useRequest<TRequest extends Request>(
             (response: AxiosResponse<Payload<TRequest>, CData<TRequest>>) => {
               removeCancelToken(source.token);
               const { data, ...restResponse } = response;
+
+              onCompletedRef.current?.(data, restResponse);
               return [data, restResponse];
             },
           )
-          .catch((error: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
+          .catch((err: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
             removeCancelToken(source.token);
 
-            if (customCreateReqError) {
-              throw customCreateReqError(error);
-            } else {
-              throw createRequestError(error);
-            }
+            const error = customCreateReqError
+              ? customCreateReqError(err)
+              : createRequestError(err);
+
+            onErrorRef.current?.(error);
+
+            throw error;
           }) as Promise<
           [Payload<TRequest>, AxiosRestResponse<CData<TRequest>>]
         >;
@@ -96,6 +106,7 @@ export function useRequest<TRequest extends Request>(
         cancel: source.cancel,
       };
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [axiosInstance, customCreateReqError, getMountedState, removeCancelToken],
   );
 
@@ -111,18 +122,17 @@ export function useRequest<TRequest extends Request>(
     [getMountedState, sources],
   );
 
-  const clearRef = useRef(clear);
-  useEffect(() => {
-    clearRef.current = clear;
-  });
+  const clearRef = useRefFn(clear);
 
   const rtnClearFn = useCallback(
     (message?: string) => clearRef.current(message),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
   useEffect(() => {
     return clearRef.current;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return [request, { clear: rtnClearFn, hasPending }];

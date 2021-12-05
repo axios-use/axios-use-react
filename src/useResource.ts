@@ -1,11 +1,4 @@
-import {
-  useEffect,
-  useCallback,
-  useContext,
-  useReducer,
-  useMemo,
-  useRef,
-} from "react";
+import { useEffect, useCallback, useContext, useReducer, useMemo } from "react";
 import type { Canceler } from "axios";
 import { useRequest } from "./useRequest";
 import type {
@@ -14,6 +7,7 @@ import type {
   RequestError,
   Request,
   RequestDispatcher,
+  RequestCallbackFn,
   AxiosRestResponse,
   Resource,
 } from "./request";
@@ -24,7 +18,7 @@ import type {
 import { RequestContext } from "./requestContext";
 import type { CacheKey, CacheKeyFn } from "./cache";
 
-import { useDeepMemo, useMountedState, getStrByFn } from "./utils";
+import { useDeepMemo, useMountedState, useRefFn, getStrByFn } from "./utils";
 
 const REQUEST_CLEAR_MESSAGE =
   "A new request has been made before completing the last one";
@@ -44,11 +38,12 @@ export type UseResourceResult<TRequest extends Request> = [
 export type UseResourceOptions<T extends Request> = Pick<
   RequestContextConfig<Payload<T>>,
   "cache" | "cacheFilter"
-> & {
-  cacheKey?: CacheKey | CacheKeyFn<T>;
-  /** Conditional Fetching */
-  filter?: (...args: Parameters<T>) => boolean;
-};
+> &
+  RequestCallbackFn<T> & {
+    cacheKey?: CacheKey | CacheKeyFn<T>;
+    /** Conditional Fetching */
+    filter?: (...args: Parameters<T>) => boolean;
+  };
 
 type Action<T, D = any> =
   | { type: "success"; data: T; other: AxiosRestResponse<D> }
@@ -120,7 +115,10 @@ export function useResource<TRequest extends Request>(
       : undefined;
   }, [cacheKey, requestCache]);
 
-  const [createRequest, { clear }] = useRequest(fn);
+  const [createRequest, { clear }] = useRequest(fn, {
+    onCompleted: options?.onCompleted,
+    onError: options?.onError,
+  });
   const [state, dispatch] = useReducer(getNextState, {
     data: cacheData,
     isLoading: Boolean(requestParams),
@@ -157,14 +155,8 @@ export function useResource<TRequest extends Request>(
     [cacheKey, clear, createRequest, getMountedState],
   );
 
-  const requestRefFn = useRef(request);
-  useEffect(() => {
-    requestRefFn.current = request;
-  }, [request]);
-  const filterRefFn = useRef(options?.filter);
-  useEffect(() => {
-    filterRefFn.current = options?.filter;
-  }, [options?.filter]);
+  const requestRefFn = useRefFn(request);
+  const filterRefFn = useRefFn(options?.filter);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
