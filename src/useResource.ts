@@ -27,7 +27,7 @@ type RequestState<TRequest extends Request> = {
   data?: Payload<TRequest>;
   other?: AxiosRestResponse<CData<TRequest>>;
   error?: RequestError<Payload<TRequest>, CData<TRequest>>;
-  isLoading: boolean;
+  isLoading?: boolean;
 };
 
 export type UseResourceResult<TRequest extends Request> = [
@@ -44,6 +44,19 @@ export type UseResourceOptions<T extends Request> = Pick<
     /** Conditional Fetching */
     filter?: (...args: Parameters<T>) => boolean;
   };
+
+function getDefaultStateLoading<T extends Request>(
+  requestParams?: Parameters<T>,
+  filter?: (...args: Parameters<T>) => boolean,
+) {
+  if (requestParams) {
+    if (filter && typeof filter === "function") {
+      return filter(...requestParams);
+    }
+    return true;
+  }
+  return undefined;
+}
 
 type Action<T, D = any> =
   | { type: "success"; data: T; other: AxiosRestResponse<D> }
@@ -121,7 +134,7 @@ export function useResource<TRequest extends Request>(
   });
   const [state, dispatch] = useReducer(getNextState, {
     data: cacheData,
-    isLoading: Boolean(requestParams),
+    isLoading: getDefaultStateLoading<TRequest>(requestParams, options?.filter),
   });
 
   const request = useCallback(

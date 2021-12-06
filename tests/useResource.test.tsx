@@ -265,6 +265,26 @@ describe("useResource", () => {
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toStrictEqual([3, 3]);
     expect(result.current[0].error).toBeUndefined();
+
+    const hook02 = renderHook(
+      (props: number[]) =>
+        useResource(
+          (...args: number[]) => ({
+            url: "/params",
+            method: "GET",
+            params: args,
+          }),
+          props,
+          { filter: (a, b) => a !== b },
+        ),
+      {
+        initialProps: [1, 1],
+      },
+    );
+
+    expect(hook02.result.current[0].isLoading).toBeFalsy();
+    expect(hook02.result.current[0].data).toBeUndefined();
+    expect(hook02.result.current[0].error).toBeUndefined();
   });
 
   it("options: onCompleted", async () => {
