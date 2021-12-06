@@ -114,16 +114,17 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 
 ### useResource
 
-| option              | type                        | explain                                                             |
-| ------------------- | --------------------------- | ------------------------------------------------------------------- |
-| fn                  | function                    | get AxiosRequestConfig function                                     |
-| parameters          | array                       | `fn` function parameters. effect dependency list                    |
-| options.cache       | object \| false             | Customized cache collections. Or close                              |
-| options.cacheKey    | string\| number \| function | Custom cache key value                                              |
-| options.cacheFilter | function                    | Callback function to decide whether to cache or not                 |
-| options.filter      | function                    | Request filter. if return a falsy value, will not start the request |
-| options.onCompleted | function                    | This function is passed the query's result data.                    |
-| options.onError     | function                    | This function is passed an `RequestError` object                    |
+| option               | type                        | explain                                                             |
+| -------------------- | --------------------------- | ------------------------------------------------------------------- |
+| fn                   | function                    | get AxiosRequestConfig function                                     |
+| parameters           | array                       | `fn` function parameters. effect dependency list                    |
+| options.cache        | object \| false             | Customized cache collections. Or close                              |
+| options.cacheKey     | string\| number \| function | Custom cache key value                                              |
+| options.cacheFilter  | function                    | Callback function to decide whether to cache or not                 |
+| options.filter       | function                    | Request filter. if return a falsy value, will not start the request |
+| options.defaultState | object                      | Initialize the state value. `{data, other, error, isLoading}`       |
+| options.onCompleted  | function                    | This function is passed the query's result data.                    |
+| options.onError      | function                    | This function is passed an `RequestError` object                    |
 
 ```tsx
 // js
