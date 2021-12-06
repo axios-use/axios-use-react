@@ -287,6 +287,50 @@ describe("useResource", () => {
     expect(hook02.result.current[0].error).toBeUndefined();
   });
 
+  it("options: defaultState", async () => {
+    const { result, rerender, waitForNextUpdate } = renderHook(
+      (props: number[]) =>
+        useResource(
+          (...args: number[]) => ({
+            url: "/params",
+            method: "GET",
+            params: args,
+          }),
+          props,
+          {
+            defaultState: {
+              data: [1, 2, 3],
+            },
+          },
+        ),
+    );
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([1, 2, 3]);
+    expect(result.current[0].error).toBeUndefined();
+
+    rerender([3, 4]);
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toStrictEqual([1, 2, 3]);
+    expect(result.current[0].error).toBeUndefined();
+
+    await waitForNextUpdate();
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([3, 4]);
+    expect(result.current[0].error).toBeUndefined();
+
+    void act(() => {
+      result.current[1](5, 6);
+    });
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toStrictEqual([3, 4]);
+    expect(result.current[0].error).toBeUndefined();
+    await waitForNextUpdate();
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toStrictEqual([5, 6]);
+    expect(result.current[0].error).toBeUndefined();
+  });
+
   it("options: onCompleted", async () => {
     const onCompleted = jest.fn();
     const onError = jest.fn();

@@ -43,6 +43,7 @@ export type UseResourceOptions<T extends Request> = Pick<
     cacheKey?: CacheKey | CacheKeyFn<T>;
     /** Conditional Fetching */
     filter?: (...args: Parameters<T>) => boolean;
+    defaultState?: RequestState<T>;
   };
 
 function getDefaultStateLoading<T extends Request>(
@@ -135,6 +136,7 @@ export function useResource<TRequest extends Request>(
   const [state, dispatch] = useReducer(getNextState, {
     data: cacheData,
     isLoading: getDefaultStateLoading<TRequest>(requestParams, options?.filter),
+    ...options?.defaultState,
   });
 
   const request = useCallback(
