@@ -1,3 +1,38 @@
+# [5.0.0](https://github.com/react-cmpt/react-request-hook/compare/v4.3.0...v5.0.0) (2021-12-08)
+
+
+### Features
+
+* **RequestContext:** `customCreateReqError` function. ([#5](https://github.com/react-cmpt/react-request-hook/pull/5))
+* **useResource:** defaultState options. ([4cc6643](https://github.com/react-cmpt/react-request-hook/commit/4cc6643aa6c4247a4c5493c13f75c54b651cc3df))
+* **useRequest/useResource:** onCompleted, onError options. ([#6](https://github.com/react-cmpt/react-request-hook/pull/6))
+  ```ts
+  // useRequest
+  const [createRequest, { hasPending, cancel }] = useRequest(
+    (id) => ({ url: `/user/${id}`, method: "DELETE" }),
+    {
+      onCompleted: (data, other) => console.info(data, other),
+      onError: (err) => console.info(err),
+    },
+  );
+  // useResource
+  const [{ data, isLoading, error }] = useResource(
+    () => ({ url: "/users/", method: "GET" }),
+    [],
+    {
+      onCompleted: (data, other) => console.info(data, other),
+      onError: (err) => console.info(err),
+    },
+  );
+  ```
+
+
+### Bug Fixes
+
+* **useResource:** default isLoading value when using filter (state). ([4fb4f6d](https://github.com/react-cmpt/react-request-hook/commit/4fb4f6dc3a50a4eeda443f0aa13f9b2358c843f1))
+
+
+
 ## [4.3.0](https://github.com/react-cmpt/react-request-hook/compare/v4.2.0...v4.3.0) (2021-11-24)
 
 
