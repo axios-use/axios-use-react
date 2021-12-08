@@ -35,7 +35,11 @@ ReactDOM.render(
 );
 ```
 
-#### config
+```tsx
+import { useRequest, useResource } from "@react-cmpt/react-request-hook";
+```
+
+#### RequestProvider config
 
 | config               | type            | explain                                                    |
 | -------------------- | --------------- | ---------------------------------------------------------- |
@@ -57,7 +61,7 @@ ReactDOM.render(
 // js
 const [createRequest, { hasPending, cancel }] = useRequest((id) => ({
   url: `/user/${id}`,
-  method: "GET",
+  method: "DELETE",
 }));
 
 // tsx
@@ -65,7 +69,7 @@ const [createRequest, { hasPending, cancel }] = useRequest((id: string) =>
   // response.data: Result. AxiosResponse<Result>
   request<Result>({
     url: `/user/${id}`,
-    method: "GET",
+    method: "DELETE",
   }),
 );
 ```
@@ -103,7 +107,7 @@ useEffect(() => {
 const [createRequest, { hasPending, cancel }] = useRequest(
   (id) => ({
     url: `/user/${id}`,
-    method: "GET",
+    method: "DELETE",
   }),
   {
     onCompleted: (data, other) => console.info(data, other),
@@ -128,7 +132,7 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 
 ```tsx
 // js
-const [reqState, fetch] = useResource((id) => ({
+const [{ data, error, isLoading }, fetch] = useResource((id) => ({
   url: `/user/${id}`,
   method: "GET",
 }));
