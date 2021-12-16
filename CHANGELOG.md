@@ -1,3 +1,12 @@
+## [5.0.1](https://github.com/react-cmpt/react-request-hook/compare/v5.0.0...v5.0.1) (2021-12-16)
+
+
+### Chore
+
+* peerDependencies: axios version >= 0.21.4. (for `AxiosRequestConfig` genericity ) ([fe6ac4e](https://github.com/react-cmpt/react-request-hook/commit/fe6ac4ea1befe668665fb8da8f8cf5486186f4d9))
+
+
+
 # [5.0.0](https://github.com/react-cmpt/react-request-hook/compare/v4.3.0...v5.0.0) (2021-12-08)
 
 
