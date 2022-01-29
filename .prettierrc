@@ -3,5 +3,13 @@
   "printWidth": 80,
   "tabWidth": 2,
   "trailingComma": "all",
-  "bracketSameLine": true
+  "bracketSameLine": true,
+  "overrides": [
+    {
+      "files": ["**/*.md"],
+      "options": {
+        "printWidth": 120
+      }
+    }
+  ]
 }
