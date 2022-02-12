@@ -15,8 +15,8 @@ Fork: https://github.com/schettino/react-request-hook
 ```js
 import { useResource } from "@react-cmpt/react-request-hook";
 
-function Profile() {
-  const [{ data, error, isLoading }] = useResource((id) => ({ url: `/user/${id}` }));
+function Profile({ userId }) {
+  const [{ data, error, isLoading }] = useResource((id) => ({ url: `/user/${id}` }), [userId]);
 
   if (error) return <div>failed to load</div>;
   if (isLoading) return <div>loading...</div>;
