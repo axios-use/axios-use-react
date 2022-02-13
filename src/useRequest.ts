@@ -20,9 +20,6 @@ import { RequestContext } from "./requestContext";
 
 import { useMountedState, useRefFn } from "./utils";
 
-const REQUEST_AXIOS_INSTANCE_MESSAGE =
-  "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>";
-
 export type UseRequestOptions<TRequest extends Request> =
   RequestCallbackFn<TRequest>;
 
@@ -40,12 +37,8 @@ export function useRequest<TRequest extends Request>(
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
-  const axiosInstance = RequestConfig.instance;
+  const axiosInstance = RequestConfig.instance || axios;
   const customCreateReqError = RequestConfig.customCreateReqError;
-
-  if (!axiosInstance) {
-    throw new Error(REQUEST_AXIOS_INSTANCE_MESSAGE);
-  }
 
   const [sources, setSources] = useState<CancelTokenSource[]>([]);
   const hasPending = sources.length > 0;

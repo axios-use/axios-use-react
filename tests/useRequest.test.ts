@@ -124,19 +124,14 @@ describe("useRequest", () => {
     });
   });
 
-  it("No axios instance", () => {
+  it("No axios instance", async () => {
     const { result } = originalRenderHook(() =>
       useRequest(() => ({ url: "/users", method: "GET" })),
     );
 
-    void act(() => {
-      try {
-        result.current[0]();
-      } catch (error) {
-        expect((error as Error)?.message).toEqual(
-          "react-request-hook requires an Axios instance to be passed through context via the <RequestProvider>",
-        );
-      }
+    await act(async () => {
+      const [res] = await result.current[0]().ready();
+      expect(res).toStrictEqual(okResponse);
     });
   });
 

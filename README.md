@@ -24,13 +24,17 @@ function Profile({ userId }) {
 }
 ```
 
+```tsx
+import { useRequest, useResource } from "@react-cmpt/react-request-hook";
+```
+
 ### installation
 
 ```shell
 yarn add axios @react-cmpt/react-request-hook
 ```
 
-### setup
+### RequestProvider
 
 ```tsx
 import axios from "axios";
@@ -42,15 +46,12 @@ const axiosInstance = axios.create({
 });
 
 ReactDOM.render(
+  // custom instance
   <RequestProvider instance={axiosInstance}>
     <App />
   </RequestProvider>,
   document.getElementById("root"),
 );
-```
-
-```tsx
-import { useRequest, useResource } from "@react-cmpt/react-request-hook";
 ```
 
 #### RequestProvider config
