@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import type { FC } from "react";
+import type { FC, PropsWithChildren } from "react";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import type { RenderHookOptions } from "@testing-library/react-hooks";
@@ -13,7 +13,9 @@ const mockAdapter = new MockAdapter(axios);
 
 export const cache = wrapCache(new Map());
 
-const AllTheProviders: FC<Omit<RequestContextConfig, "instance">> = (props) => (
+const AllTheProviders: FC<
+  PropsWithChildren<Omit<RequestContextConfig, "instance">>
+> = (props) => (
   <RequestProvider instance={axios} {...props} cache={props.cache ?? cache}>
     {props.children}
   </RequestProvider>
