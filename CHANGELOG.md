@@ -1,3 +1,38 @@
+# [6.0.0](https://github.com/axios-use/react/compare/v5.1.0...v6.0.0) (2022-05-15)
+
+
+### BREAKING CHANGES
+You must update all imports from '@react-cmpt/react-request-hook' to '@axios-use/react'
+
+🚨🚨🚨 Find/replace `@react-cmpt/react-request-hook` for `@axios-use/react` and upgrade to v6
+
+
+### Features
+
+* Customize the Axios instance of the current item. ([#10](https://github.com/axios-use/react/pull/10))
+  ```tsx
+  const customIns = axios.create({
+    // ...
+  });
+
+  function Profile({ userId }) {
+    const [{ data, error, isLoading }] = useResource(
+      (id) => ({ url: `/user/${id}` }),
+      [userId],
+      { instance: customIns },
+    );
+
+    // ...
+  }
+  ```
+* **useResource:** requestParams type can be `false`. ([887aabc](https://github.com/axios-use/react/commit/887aabcf45f3c8e1410fcff3ffc4371de511aef3))
+
+
+### Chore
+
+* Upgrade devDependencies. (Typescript 4.6 [0d2b6ed](https://github.com/axios-use/react/commit/0d2b6ed6df308e67462b4852f86ec6f3bd4a8df5), React 18 [70e53cd](https://github.com/axios-use/react/commit/70e53cd7a1f6b700f6a0a78ad3c86fa7c3b5f731))
+
+
 ## [5.1.0](https://github.com/react-cmpt/react-request-hook/compare/v5.0.1...v5.1.0) (2022-02-13)
 
 
@@ -131,7 +166,7 @@
 # [3.0.0](https://github.com/react-cmpt/react-request-hook/compare/v2.2.2...v3.0.0) (2021-01-03)
 
 
-### Features
+### Features (BREAKING CHANGES)
 
 * **useRequest:** swap returns ([7169e9e](https://github.com/react-cmpt/react-request-hook/commit/7169e9e5fd1fbb4d89f1f8b729d7bb773545f1cc))
    ```tsx
