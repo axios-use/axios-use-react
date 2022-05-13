@@ -12,6 +12,7 @@ import type { RequestError } from "../src";
 import { useRequest } from "../src";
 
 const okResponse = { code: 0, data: [1, 2], message: null };
+const okResponse2 = { code: 0, data: "res2", message: null };
 const errResponse = { code: 2001, data: [3, 4], message: "some error" };
 const errResponse2 = { code: 2001, data: [3, 4], msg: "some error" };
 
@@ -209,6 +210,44 @@ describe("useRequest", () => {
         expect(onError).toHaveBeenCalledTimes(1);
         expect(onError).toHaveBeenCalledWith(error);
       }
+    });
+  });
+});
+
+describe("useRequest - custom instance", () => {
+  beforeAll(() => {
+    mockAdapter.onGet("/users").reply((config) => {
+      if (config.headers?.["xxxkey"] === "use-request") {
+        return [200, okResponse2];
+      }
+      return [200, okResponse];
+    });
+  });
+
+  it("default", async () => {
+    const { result } = originalRenderHook(() =>
+      useRequest(() => ({ url: "/users", method: "GET" })),
+    );
+
+    await act(async () => {
+      const [res] = await result.current[0]().ready();
+      expect(res).toStrictEqual(okResponse);
+    });
+  });
+
+  it("options: instance", async () => {
+    const instance = axios.create({
+      headers: {
+        xxxkey: "use-request",
+      },
+    });
+    const { result } = originalRenderHook(() =>
+      useRequest(() => ({ url: "/users", method: "GET" }), { instance }),
+    );
+
+    await act(async () => {
+      const [res] = await result.current[0]().ready();
+      expect(res).toStrictEqual(okResponse2);
     });
   });
 });

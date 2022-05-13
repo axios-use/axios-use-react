@@ -66,11 +66,12 @@ ReactDOM.render(
 
 ### useRequest
 
-| option              | type     | explain                                          |
-| ------------------- | -------- | ------------------------------------------------ |
-| fn                  | function | get AxiosRequestConfig function                  |
-| options.onCompleted | function | This function is passed the query's result data. |
-| options.onError     | function | This function is passed an `RequestError` object |
+| option              | type            | explain                                          |
+| ------------------- | --------------- | ------------------------------------------------ |
+| fn                  | function        | get AxiosRequestConfig function                  |
+| options.onCompleted | function        | This function is passed the query's result data. |
+| options.onError     | function        | This function is passed an `RequestError` object |
+| options.instance    | `AxiosInstance` | Customize the Axios instance of the current item |
 
 ```tsx
 // js
@@ -144,6 +145,7 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 | options.defaultState | object                      | Initialize the state value. `{data, other, error, isLoading}`       |
 | options.onCompleted  | function                    | This function is passed the query's result data.                    |
 | options.onError      | function                    | This function is passed an `RequestError` object                    |
+| options.instance     | `AxiosInstance`             | Customize the Axios instance of the current item                    |
 
 ```tsx
 // js
