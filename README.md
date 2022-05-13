@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/axios-use/react/workflows/CI/badge.svg)](https://github.com/axios-use/react/actions?query=workflow%3ACI)
 [![npm](https://img.shields.io/npm/v/@axios-use/react.svg)](https://www.npmjs.com/package/@axios-use/react)
-[![GitHub license](https://img.shields.io/github/license/axios-use/react)](https://github.com/axios-use/react/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/axios-use/react)](https://github.com/axios-use/react/blob/main/LICENSE)
 
 Fork: https://github.com/schettino/react-request-hook
 
