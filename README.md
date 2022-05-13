@@ -1,10 +1,10 @@
-# react-request-hook
+# @axios-use/react
 
 > A React hook plugin for Axios. Lightweight and less change.
 
-[![CI](https://github.com/react-cmpt/react-request-hook/workflows/CI/badge.svg)](https://github.com/react-cmpt/react-request-hook/actions?query=workflow%3ACI)
-[![npm](https://img.shields.io/npm/v/@react-cmpt/react-request-hook.svg)](https://www.npmjs.com/package/@react-cmpt/react-request-hook)
-[![GitHub license](https://img.shields.io/github/license/react-cmpt/react-request-hook)](https://github.com/react-cmpt/react-request-hook/blob/master/LICENSE)
+[![CI](https://github.com/axios-use/react/workflows/CI/badge.svg)](https://github.com/axios-use/react/actions?query=workflow%3ACI)
+[![npm](https://img.shields.io/npm/v/@axios-use/react.svg)](https://www.npmjs.com/package/@axios-use/react)
+[![GitHub license](https://img.shields.io/github/license/axios-use/react)](https://github.com/axios-use/react/blob/master/LICENSE)
 
 Fork: https://github.com/schettino/react-request-hook
 
@@ -13,7 +13,7 @@ Fork: https://github.com/schettino/react-request-hook
 ### Quick Start
 
 ```js
-import { useResource } from "@react-cmpt/react-request-hook";
+import { useResource } from "@axios-use/react";
 
 function Profile({ userId }) {
   const [{ data, error, isLoading }] = useResource((id) => ({ url: `/user/${id}` }), [userId]);
@@ -25,20 +25,20 @@ function Profile({ userId }) {
 ```
 
 ```tsx
-import { useRequest, useResource } from "@react-cmpt/react-request-hook";
+import { useRequest, useResource } from "@axios-use/react";
 ```
 
 ### installation
 
 ```shell
-yarn add axios @react-cmpt/react-request-hook
+yarn add axios @axios-use/react
 ```
 
 ### RequestProvider
 
 ```tsx
 import axios from "axios";
-import { RequestProvider } from "@react-cmpt/react-request-hook";
+import { RequestProvider } from "@axios-use/react";
 
 // https://github.com/axios/axios#creating-an-instance
 const axiosInstance = axios.create({
