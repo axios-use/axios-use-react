@@ -1,7 +1,7 @@
 {
   "name": "@axios-use/react",
   "version": "5.1.0",
-  "description": "Managed request calls made easy by React Hooks",
+  "description": "A React hook plugin for Axios. Lightweight and less change",
   "contributors": [
     "Matheus Schettino <schettino2@gmail.com>",
     "Dave Wang <wangcch.cc@gmail.com>"
