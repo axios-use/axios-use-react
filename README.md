@@ -137,7 +137,7 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 | option               | type                        | explain                                                             |
 | -------------------- | --------------------------- | ------------------------------------------------------------------- |
 | fn                   | function                    | get AxiosRequestConfig function                                     |
-| parameters           | array                       | `fn` function parameters. effect dependency list                    |
+| parameters           | array \| false              | `fn` function parameters. effect dependency list                    |
 | options.cache        | object \| false             | Customized cache collections. Or close                              |
 | options.cacheKey     | string\| number \| function | Custom cache key value                                              |
 | options.cacheFilter  | function                    | Callback function to decide whether to cache or not                 |

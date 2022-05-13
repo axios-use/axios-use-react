@@ -336,7 +336,7 @@ describe("useResource", () => {
     const onCompleted = jest.fn();
     const onError = jest.fn();
     const { result, waitForNextUpdate } = renderHook(() =>
-      useResource(() => ({ url: "/users", method: "GET" }), undefined, {
+      useResource(() => ({ url: "/users", method: "GET" }), false, {
         onCompleted,
         onError,
       }),

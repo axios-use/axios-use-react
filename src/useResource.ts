@@ -47,7 +47,7 @@ export type UseResourceOptions<T extends Request> = Pick<
   };
 
 function getDefaultStateLoading<T extends Request>(
-  requestParams?: Parameters<T>,
+  requestParams?: Parameters<T> | false,
   filter?: (...args: Parameters<T>) => boolean,
 ) {
   if (requestParams) {
@@ -78,7 +78,7 @@ function getNextState<TRequest extends Request>(
 
 export function useResource<TRequest extends Request>(
   fn: TRequest,
-  requestParams?: Parameters<TRequest>,
+  requestParams?: Parameters<TRequest> | false,
   options?: UseResourceOptions<TRequest>,
 ): UseResourceResult<TRequest> {
   const getMountedState = useMountedState();
