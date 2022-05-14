@@ -1,12 +1,21 @@
-# @axios-use/react
+<p align="center">
+<a href="https://github.com/axios-use/react#gh-light-mode-only">
+  <img src="https://raw.githubusercontent.com/axios-use/react/main/other/axios-use-react.png#gh-light-mode-only" alt="@axios-use/react - A React hook plugin for Axios. Lightweight and less change." width="460">
+</a>
+<a href="https://github.com/axios-use/react#gh-dark-mode-only">
+  <img src="https://raw.githubusercontent.com/axios-use/react/main/other/axios-use-react-dark.png#gh-dark-mode-only" alt="@axios-use/react - A React hook plugin for Axios. Lightweight and less change." width="460">
+</a>
+<br>
+A React hook plugin for Axios. Lightweight, cancelable and less change.
+</p>
 
-> A React hook plugin for Axios. Lightweight and less change.
-
-[![CI](https://github.com/axios-use/react/workflows/CI/badge.svg)](https://github.com/axios-use/react/actions?query=workflow%3ACI)
-[![npm](https://img.shields.io/npm/v/@axios-use/react.svg)](https://www.npmjs.com/package/@axios-use/react)
-[![GitHub license](https://img.shields.io/github/license/axios-use/react)](https://github.com/axios-use/react/blob/main/LICENSE)
-
-Fork: https://github.com/schettino/react-request-hook
+<p align="center">
+<a href="https://www.npmjs.com/package/@axios-use/react" target="__blank"><img src="https://img.shields.io/npm/v/@axios-use/react.svg" alt="NPM version"></a>
+<a href="https://github.com/axios-use/react/actions?query=workflow%3ACI" target="__blank"><img src="https://github.com/axios-use/react/workflows/CI/badge.svg" alt="ci"></a>
+<a href="https://github.com/axios-use/react/blob/main/LICENSE" target="__blank"><img src="https://img.shields.io/github/license/axios-use/react" alt="license"></a>
+</p>
+<br>
+<br>
 
 ## Usage
 
