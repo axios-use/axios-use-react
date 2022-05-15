@@ -16,6 +16,7 @@ import {
 } from "../src";
 
 const okResponse = { code: 0, data: [1, 2], message: null };
+const okResponse2 = { code: 0, data: "res2", message: null };
 const errResponse = { code: 2001, data: [3, 4], message: "some error" };
 
 describe("useResource", () => {
@@ -335,7 +336,7 @@ describe("useResource", () => {
     const onCompleted = jest.fn();
     const onError = jest.fn();
     const { result, waitForNextUpdate } = renderHook(() =>
-      useResource(() => ({ url: "/users", method: "GET" }), undefined, {
+      useResource(() => ({ url: "/users", method: "GET" }), false, {
         onCompleted,
         onError,
       }),
@@ -753,5 +754,47 @@ describe("useResource - cache", () => {
     expect(req02.result.current[0].isLoading).toBeFalsy();
     expect(req02.result.current[0].data).toStrictEqual([9, 10]);
     expect(req02.result.current[0].error).toBeUndefined();
+  });
+});
+
+describe("useResource - custom instance", () => {
+  beforeAll(() => {
+    mockAdapter.onGet("/users").reply((config) => {
+      if (config.headers?.["xxxkey"] === "use-request") {
+        return [200, okResponse2];
+      }
+      return [200, okResponse];
+    });
+  });
+
+  it("options: instance", async () => {
+    const instance = axios.create({
+      headers: {
+        xxxkey: "use-request",
+      },
+    });
+    const { result, waitFor } = renderHook(() =>
+      useResource(() => ({ url: "/users", method: "GET" }), undefined, {
+        instance,
+      }),
+    );
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
+
+    void act(() => {
+      result.current[1]();
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].other).toBeUndefined();
+
+    await waitFor(() => {
+      expect(result.current[0].error).toBeUndefined();
+      expect(result.current[0].data).toStrictEqual(okResponse2);
+      expect(result.current[0].other?.status).toBe(200);
+    });
   });
 });

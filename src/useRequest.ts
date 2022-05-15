@@ -5,6 +5,7 @@ import type {
   Canceler,
   CancelToken,
   AxiosResponse,
+  AxiosInstance,
 } from "axios";
 import axios from "axios";
 import type {
@@ -21,7 +22,9 @@ import { RequestContext } from "./requestContext";
 import { useMountedState, useRefFn } from "./utils";
 
 export type UseRequestOptions<TRequest extends Request> =
-  RequestCallbackFn<TRequest>;
+  RequestCallbackFn<TRequest> & {
+    instance?: AxiosInstance;
+  };
 
 export type UseRequestResult<TRequest extends Request> = [
   RequestFactory<TRequest>,
@@ -37,7 +40,7 @@ export function useRequest<TRequest extends Request>(
 ): UseRequestResult<TRequest> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
-  const axiosInstance = RequestConfig.instance || axios;
+  const axiosInstance = options?.instance || RequestConfig.instance || axios;
   const customCreateReqError = RequestConfig.customCreateReqError;
 
   const [sources, setSources] = useState<CancelTokenSource[]>([]);

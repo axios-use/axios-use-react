@@ -1,15 +1,15 @@
-English | [简体中文](./README.zh-CN.md)
+简体中文 | [English](./README.md)
 
 <br>
 <p align="center">
 <a href="https://github.com/axios-use/react#gh-light-mode-only">
-  <img src="https://raw.githubusercontent.com/axios-use/react/main/other/axios-use-react.png#gh-light-mode-only" alt="@axios-use/react - A React hook plugin for Axios. Lightweight and less change." width="460">
+  <img src="https://raw.githubusercontent.com/axios-use/react/main/other/axios-use-react.png#gh-light-mode-only" alt="@axios-use/react - 一个 Axios 的 React Hook 插件，小而美" width="460">
 </a>
 <a href="https://github.com/axios-use/react#gh-dark-mode-only">
-  <img src="https://raw.githubusercontent.com/axios-use/react/main/other/axios-use-react-dark.png#gh-dark-mode-only" alt="@axios-use/react - A React hook plugin for Axios. Lightweight and less change." width="460">
+  <img src="https://raw.githubusercontent.com/axios-use/react/main/other/axios-use-react-dark.png#gh-dark-mode-only" alt="@axios-use/react - 一个 Axios 的 React Hook 插件，小而美" width="460">
 </a>
 <br>
-A React hook plugin for Axios. Lightweight, cancelable and less change.
+一个 Axios 的 React Hook 插件，小而美
 </p>
 
 <p align="center">
@@ -26,9 +26,9 @@ A React hook plugin for Axios. Lightweight, cancelable and less change.
 <br>
 <br>
 
-## Usage
+## 使用
 
-### Quick Start
+### 快速开始
 
 ```js
 import { useResource } from "@axios-use/react";
@@ -66,24 +66,24 @@ ReactDOM.render(
 );
 ```
 
-#### RequestProvider config
+#### RequestProvider 配置
 
 | config               | type            | explain                                                    |
 | -------------------- | --------------- | ---------------------------------------------------------- |
-| instance             | object          | axios instance                                             |
-| cache                | object \| false | Customized cache collections. Or close. (**Default on**)   |
-| cacheKey             | function        | Global custom formatted cache keys                         |
-| cacheFilter          | function        | Global callback function to decide whether to cache or not |
-| customCreateReqError | function        | Custom format error data                                   |
+| instance             | object          | 自定义 Provider 下的 Axios 实例                            |
+| cache                | object \| false | 自定义 Provider 下的 Cache 对象，或关闭。 (**默认开启**)   |
+| cacheKey             | function        | 自定义 Provider 下的生成 Cache key 函数                    |
+| cacheFilter          | function        | 缓存筛选器，自定义 Provider 下的过滤响应缓存，决定是否存储 |
+| customCreateReqError | function        | 自定义 Provider 下的格式化错误响应                         |
 
 ### useRequest
 
-| option              | type            | explain                                          |
-| ------------------- | --------------- | ------------------------------------------------ |
-| fn                  | function        | get AxiosRequestConfig function                  |
-| options.onCompleted | function        | This function is passed the query's result data. |
-| options.onError     | function        | This function is passed an `RequestError` object |
-| options.instance    | `AxiosInstance` | Customize the Axios instance of the current item |
+| option              | type            | explain                   |
+| ------------------- | --------------- | ------------------------- |
+| fn                  | function        | 传递 Axios 请求配置的函数 |
+| options.onCompleted | function        | 请求成功的回调函数        |
+| options.onError     | function        | 请求失败的回调函数        |
+| options.instance    | `AxiosInstance` | 自定义当前项的 Axios 实例 |
 
 ```tsx
 // js
@@ -146,18 +146,18 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 
 ### useResource
 
-| option               | type                        | explain                                                             |
-| -------------------- | --------------------------- | ------------------------------------------------------------------- |
-| fn                   | function                    | get AxiosRequestConfig function                                     |
-| parameters           | array \| false              | `fn` function parameters. effect dependency list                    |
-| options.cache        | object \| false             | Customized cache collections. Or close                              |
-| options.cacheKey     | string\| number \| function | Custom cache key value                                              |
-| options.cacheFilter  | function                    | Callback function to decide whether to cache or not                 |
-| options.filter       | function                    | Request filter. if return a falsy value, will not start the request |
-| options.defaultState | object                      | Initialize the state value. `{data, other, error, isLoading}`       |
-| options.onCompleted  | function                    | This function is passed the query's result data.                    |
-| options.onError      | function                    | This function is passed an `RequestError` object                    |
-| options.instance     | `AxiosInstance`             | Customize the Axios instance of the current item                    |
+| option               | type                        | explain                                                               |
+| -------------------- | --------------------------- | --------------------------------------------------------------------- |
+| fn                   | function                    | 传递 Axios 请求配置的函数                                             |
+| parameters           | array \| false              | 传递 Axios 配置函数参数的数组对象，effect 依赖项。`false`关闭依赖响应 |
+| options.cache        | object \| false             | 自定义 Cache 对象，或关闭。 (**默认继承全局**)                        |
+| options.cacheKey     | string\| number \| function | 自定义生成 Cache key 函数                                             |
+| options.cacheFilter  | function                    | 缓存筛选器，自定义过滤响应缓存，决定是否存储                          |
+| options.filter       | function                    | 请求筛选器，决定是否发起请求                                          |
+| options.defaultState | object                      | State 的初始化值. `{data, other, error, isLoading}`                   |
+| options.onCompleted  | function                    | 请求成功的回调函数                                                    |
+| options.onError      | function                    | 请求失败的回调函数                                                    |
+| options.instance     | `AxiosInstance`             | 自定义当前项的 Axios 实例                                             |
 
 ```tsx
 // js
@@ -191,7 +191,7 @@ interface ReqState {
 type Fetch = (...args: Parameters<TRequest>) => Canceler;
 ```
 
-The request can also be triggered passing its arguments as dependencies to the _useResource_ hook.
+将其参数作为依赖项传递给 `useResource`，根据参数变化自动触发请求
 
 ```jsx
 const [userId, setUserId] = useState();
@@ -245,11 +245,11 @@ const [reqState] = useResource(
 
 https://codesandbox.io/s/react-request-hook-cache-9o2hz
 
-### other
+### 其他
 
 #### request
 
-The `request` function allows you to define the response type coming from it. It also helps with creating a good pattern on defining your API calls and the expected results. It's just an identity function that accepts the request config and returns it. Both `useRequest` and `useResource` extract the expected and annotated type definition and resolve it on the `response.data` field.
+`request` 作用于 Typescript 类型推导，便于识别 response 类型
 
 ```tsx
 const api = {
@@ -271,7 +271,7 @@ const api = {
 
 #### createRequestError
 
-The `createRequestError` normalizes the error response. This function is used internally as well. The `isCancel` flag is returned, so you don't have to call **axios.isCancel** later on the promise catch block.
+`createRequestError` 用于规范错误响应（该函数也默认在内部调用）。 `isCancel` 标志被返回，因此也不必在 promise catch 块上调用 **axios.isCancel**。
 
 ```tsx
 interface RequestError<T> {
@@ -283,6 +283,6 @@ interface RequestError<T> {
 }
 ```
 
-## License
+## 许可证
 
 [MIT](./LICENSE)

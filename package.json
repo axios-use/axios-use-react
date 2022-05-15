@@ -1,7 +1,7 @@
 {
-  "name": "@react-cmpt/react-request-hook",
+  "name": "@axios-use/react",
   "version": "5.1.0",
-  "description": "Managed request calls made easy by React Hooks",
+  "description": "A React hook plugin for Axios. Lightweight, cancelable and less change",
   "contributors": [
     "Matheus Schettino <schettino2@gmail.com>",
     "Dave Wang <wangcch.cc@gmail.com>"
@@ -9,7 +9,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/react-cmpt/react-request-hook.git"
+    "url": "git+https://github.com/axios-use/react.git"
   },
   "keywords": [
     "axios",
