@@ -105,7 +105,7 @@ const [createRequest, { hasPending, cancel }] = useRequest((id: string) =>
 ```tsx
 interface CreateRequest {
   // Promise function
-  ready: () => Promise<[Payload<TRequest>, AxiosRestResponse]>;
+  ready: () => Promise<[Payload<TRequest>, AxiosResponse]>;
   // Axios Canceler. clear current request.
   cancel: Canceler;
 }
@@ -138,7 +138,7 @@ const [createRequest, { hasPending, cancel }] = useRequest(
     method: "DELETE",
   }),
   {
-    onCompleted: (data, other) => console.info(data, other),
+    onCompleted: (data, response) => console.info(data, response),
     onError: (err) => console.info(err),
   },
 );
@@ -154,7 +154,7 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 | options.cacheKey     | string\| number \| function | Custom cache key value                                              |
 | options.cacheFilter  | function                    | Callback function to decide whether to cache or not                 |
 | options.filter       | function                    | Request filter. if return a falsy value, will not start the request |
-| options.defaultState | object                      | Initialize the state value. `{data, other, error, isLoading}`       |
+| options.defaultState | object                      | Initialize the state value. `{data, response, error, isLoading}`    |
 | options.onCompleted  | function                    | This function is passed the query's result data.                    |
 | options.onError      | function                    | This function is passed an `RequestError` object                    |
 | options.instance     | `AxiosInstance`             | Customize the Axios instance of the current item                    |
@@ -180,8 +180,8 @@ const [reqState, fetch] = useResource((id: string) =>
 interface ReqState {
   // Result
   data?: Payload<TRequest>;
-  // other axios response. Omit<AxiosResponse, "data">
-  other?: AxiosRestResponse;
+  // axios response
+  response?: AxiosResponse;
   // normalized error
   error?: RequestError<Payload<TRequest>>;
   isLoading: boolean;
@@ -235,7 +235,7 @@ const [reqState] = useResource(
   }),
   [],
   {
-    onCompleted: (data, other) => console.info(data, other),
+    onCompleted: (data, response) => console.info(data, response),
     onError: (err) => console.info(err),
   },
 );
