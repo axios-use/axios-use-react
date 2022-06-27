@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useContext, useReducer, useMemo } from "react";
-import type { Canceler } from "axios";
+import type { Canceler, AxiosResponse } from "axios";
 import { useRequest } from "./useRequest";
 import type {
   Payload,
@@ -8,7 +8,6 @@ import type {
   Request,
   RequestDispatcher,
   RequestCallbackFn,
-  AxiosRestResponse,
   Resource,
 } from "./request";
 import type {
@@ -25,9 +24,12 @@ const REQUEST_CLEAR_MESSAGE =
 
 type RequestState<TRequest extends Request> = {
   data?: Payload<TRequest>;
-  other?: AxiosRestResponse<CData<TRequest>>;
+  response?: AxiosResponse<CData<TRequest>>;
   error?: RequestError<Payload<TRequest>, CData<TRequest>>;
   isLoading?: boolean;
+
+  /** @deprecated Use `response` instead */
+  other?: AxiosResponse<CData<TRequest>>;
 };
 
 export type UseResourceResult<TRequest extends Request> = [
@@ -60,7 +62,7 @@ function getDefaultStateLoading<T extends Request>(
 }
 
 type Action<T, D = any> =
-  | { type: "success"; data: T; other: AxiosRestResponse<D> }
+  | { type: "success"; data: T; response: AxiosResponse<D> }
   | { type: "error"; error: RequestError<T, D> }
   | { type: "reset" | "start" };
 
@@ -68,11 +70,15 @@ function getNextState<TRequest extends Request>(
   state: RequestState<TRequest>,
   action: Action<Payload<TRequest>, CData<TRequest>>,
 ): RequestState<TRequest> {
+  const response = action.type === "success" ? action.response : state.response;
+
   return {
     data: action.type === "success" ? action.data : state.data,
-    other: action.type === "success" ? action.other : state.other,
+    response,
     error: action.type === "error" ? action.error : undefined,
     isLoading: action.type === "start" ? true : false,
+    // will be deleted
+    other: response,
   };
 }
 
@@ -148,9 +154,9 @@ export function useResource<TRequest extends Request>(
       void (async () => {
         try {
           getMountedState() && dispatch({ type: "start" });
-          const [data, other] = await ready();
+          const [data, response] = await ready();
           if (getMountedState()) {
-            dispatch({ type: "success", data, other });
+            dispatch({ type: "success", data, response });
 
             cacheKey &&
               requestCache &&

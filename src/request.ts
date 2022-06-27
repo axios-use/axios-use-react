@@ -6,6 +6,7 @@ import type {
 } from "axios";
 import axios from "axios";
 
+/** @deprecated No longer use. Use `AxiosResponse` instead */
 export type AxiosRestResponse<D = any> = Omit<
   AxiosResponse<unknown, D>,
   "data"
@@ -24,7 +25,7 @@ export interface RequestFactory<TRequest extends Request> {
   (...args: Parameters<TRequest>): {
     cancel: Canceler;
     ready: () => Promise<
-      [Payload<TRequest>, AxiosRestResponse<CData<TRequest>>]
+      [Payload<TRequest>, AxiosResponse<unknown, CData<TRequest>>]
     >;
   };
 }
@@ -49,7 +50,7 @@ export interface RequestError<
 export type RequestCallbackFn<TRequest extends Request> = {
   onCompleted?: (
     data?: Payload<TRequest>,
-    other?: AxiosRestResponse<CData<TRequest>>,
+    response?: AxiosResponse<CData<TRequest>>,
   ) => void;
   onError?: (err?: RequestError<Payload<TRequest>, CData<TRequest>>) => void;
 };
