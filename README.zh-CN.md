@@ -105,7 +105,7 @@ const [createRequest, { hasPending, cancel }] = useRequest((id: string) =>
 ```tsx
 interface CreateRequest {
   // Promise function
-  ready: () => Promise<[Payload<TRequest>, AxiosRestResponse]>;
+  ready: () => Promise<[Payload<TRequest>, AxiosResponse]>;
   // Axios Canceler. clear current request.
   cancel: Canceler;
 }
@@ -138,7 +138,7 @@ const [createRequest, { hasPending, cancel }] = useRequest(
     method: "DELETE",
   }),
   {
-    onCompleted: (data, other) => console.info(data, other),
+    onCompleted: (data, response) => console.info(data, response),
     onError: (err) => console.info(err),
   },
 );
@@ -154,7 +154,7 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 | options.cacheKey     | string\| number \| function | 自定义生成 Cache key 函数                                             |
 | options.cacheFilter  | function                    | 缓存筛选器，自定义过滤响应缓存，决定是否存储                          |
 | options.filter       | function                    | 请求筛选器，决定是否发起请求                                          |
-| options.defaultState | object                      | State 的初始化值. `{data, other, error, isLoading}`                   |
+| options.defaultState | object                      | State 的初始化值. `{data, response, error, isLoading}`                |
 | options.onCompleted  | function                    | 请求成功的回调函数                                                    |
 | options.onError      | function                    | 请求失败的回调函数                                                    |
 | options.instance     | `AxiosInstance`             | 自定义当前项的 Axios 实例                                             |
@@ -180,8 +180,8 @@ const [reqState, fetch] = useResource((id: string) =>
 interface ReqState {
   // Result
   data?: Payload<TRequest>;
-  // other axios response. Omit<AxiosResponse, "data">
-  other?: AxiosRestResponse;
+  // axios response
+  response?: AxiosResponse;
   // normalized error
   error?: RequestError<Payload<TRequest>>;
   isLoading: boolean;
@@ -235,7 +235,7 @@ const [reqState] = useResource(
   }),
   [],
   {
-    onCompleted: (data, other) => console.info(data, other),
+    onCompleted: (data, response) => console.info(data, response),
     onError: (err) => console.info(err),
   },
 );

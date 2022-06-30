@@ -37,11 +37,12 @@ describe("useRequest", () => {
     );
 
     await act(async () => {
-      const [data, other] = await result.current[0]().ready();
+      const [data, res] = await result.current[0]().ready();
       expect(data).toStrictEqual(okResponse);
-      expect(other?.status).toBe(200);
+      expect(res.data).toStrictEqual(okResponse);
+      expect(res?.status).toBe(200);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(other?.request?.responseURL).toBe("/users");
+      expect(res?.request?.responseURL).toBe("/users");
     });
   });
 
@@ -177,11 +178,11 @@ describe("useRequest", () => {
       expect(onCompleted).toHaveBeenCalledTimes(0);
       expect(onError).toHaveBeenCalledTimes(0);
 
-      const [data, other] = await result.current[0]().ready();
+      const [data, res] = await result.current[0]().ready();
       expect(data).toStrictEqual(okResponse);
 
       expect(onCompleted).toHaveBeenCalledTimes(1);
-      expect(onCompleted).toHaveBeenCalledWith(data, other);
+      expect(onCompleted).toHaveBeenCalledWith(data, res);
       expect(onError).toHaveBeenCalledTimes(0);
     });
   });

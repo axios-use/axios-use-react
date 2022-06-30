@@ -42,6 +42,7 @@ describe("useResource", () => {
 
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
     void act(() => {
@@ -50,11 +51,14 @@ describe("useResource", () => {
 
     expect(result.current[0].isLoading).toBeTruthy();
     expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
     await waitFor(() => {
       expect(result.current[0].error).toBeUndefined();
       expect(result.current[0].data).toStrictEqual(okResponse);
+      expect(result.current[0].response?.data).toStrictEqual(okResponse);
+      expect(result.current[0].response?.status).toBe(200);
       expect(result.current[0].other?.status).toBe(200);
     });
   });
@@ -389,6 +393,7 @@ describe("useResource", () => {
 
     await waitForNextUpdate();
     expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
     expect(result.current[0].error?.code).toBe(errResponse.code);
     expect(result.current[0].error?.data).toStrictEqual(errResponse);
@@ -781,6 +786,7 @@ describe("useResource - custom instance", () => {
 
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
     void act(() => {
@@ -789,11 +795,14 @@ describe("useResource - custom instance", () => {
 
     expect(result.current[0].isLoading).toBeTruthy();
     expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
     await waitFor(() => {
       expect(result.current[0].error).toBeUndefined();
       expect(result.current[0].data).toStrictEqual(okResponse2);
+      expect(result.current[0].response?.data).toStrictEqual(okResponse2);
+      expect(result.current[0].response?.status).toBe(200);
       expect(result.current[0].other?.status).toBe(200);
     });
   });

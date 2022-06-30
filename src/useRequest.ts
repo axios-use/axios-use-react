@@ -14,7 +14,6 @@ import type {
   Request,
   Payload,
   CData,
-  AxiosRestResponse,
 } from "./request";
 import { createRequestError } from "./request";
 import { RequestContext } from "./requestContext";
@@ -76,10 +75,9 @@ export function useRequest<TRequest extends Request>(
           .then(
             (response: AxiosResponse<Payload<TRequest>, CData<TRequest>>) => {
               removeCancelToken(source.token);
-              const { data, ...restResponse } = response;
 
-              onCompletedRef.current?.(data, restResponse);
-              return [data, restResponse];
+              onCompletedRef.current?.(response.data, response);
+              return [response.data, response];
             },
           )
           .catch((err: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
@@ -92,9 +90,7 @@ export function useRequest<TRequest extends Request>(
             onErrorRef.current?.(error);
 
             throw error;
-          }) as Promise<
-          [Payload<TRequest>, AxiosRestResponse<CData<TRequest>>]
-        >;
+          }) as Promise<[Payload<TRequest>, AxiosResponse<CData<TRequest>>]>;
       };
 
       return {
