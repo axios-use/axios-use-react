@@ -1,6 +1,6 @@
 {
   "name": "@axios-use/react",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "description": "A React hook plugin for Axios. Lightweight, cancelable and less change",
   "contributors": [
     "Matheus Schettino <schettino2@gmail.com>",

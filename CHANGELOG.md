@@ -1,3 +1,28 @@
+## [6.1.0](https://github.com/axios-use/react/compare/v6.0.0...v6.1.0) (2022-07-05)
+
+
+### Features
+
+* feat(useRequest): return all response. ([e9317ce](https://github.com/axios-use/react/commit/e9317ce246a0c286c6e548d2f153dbc2cd8411b6))
+  ```diff
+  interface CreateRequest {
+    // Promise function
+  - ready: () => Promise<[Payload<TRequest>, AxiosRestResponse]>;
+  + ready: () => Promise<[Payload<TRequest>, AxiosResponse]>;
+    // Axios Canceler. clear current request.
+    cancel: Canceler;
+  }
+  ```
+
+  ```diff
+  - const [{ data, error, isLoading, other }] = useResource(...)
+  + const [{ data, error, isLoading, response }] = useResource(...)
+  ```
+
+No BREAKING CHANGES. Will keep `other` value, but deprecated.
+
+
+
 # [6.0.0](https://github.com/axios-use/react/compare/v5.1.0...v6.0.0) (2022-05-15)
 
 
