@@ -14,6 +14,7 @@ A React hook plugin for Axios. Lightweight, cancelable and less change.
 
 <p align="center">
 <a href="https://www.npmjs.com/package/@axios-use/react" target="__blank"><img src="https://img.shields.io/npm/v/@axios-use/react.svg" alt="NPM version"></a>
+<a href="https://www.npmjs.com/package/@react-cmpt/react-request-hook" target="__blank"><img src="https://img.shields.io/badge/old%20version-v5.1.0-inactive.svg" alt="NPM old version"></a>
 <a href="https://github.com/axios-use/react/actions?query=workflow%3ACI" target="__blank"><img src="https://github.com/axios-use/react/workflows/CI/badge.svg" alt="ci"></a>
 <a href="https://github.com/axios-use/react/blob/main/LICENSE" target="__blank"><img src="https://img.shields.io/github/license/axios-use/react" alt="license"></a>
 </p>
