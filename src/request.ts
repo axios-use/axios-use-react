@@ -1,8 +1,10 @@
 import type {
+  AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
   AxiosError,
   Canceler,
+  AxiosPromise,
 } from "axios";
 import axios from "axios";
 
@@ -57,7 +59,23 @@ export type RequestCallbackFn<TRequest extends Request> = {
 
 export function request<T, D = any>(
   config: AxiosRequestConfig<D>,
-): Resource<T, D> {
+  instance: AxiosInstance | true,
+): AxiosPromise<T>;
+export function request<T, D = any>(
+  config: AxiosRequestConfig<D>,
+): Resource<T, D>;
+export function request<T, D = any>(...args: any[]) {
+  const [config, instance] =
+    (args as [AxiosRequestConfig<D>, AxiosInstance | true]) || [];
+
+  if (instance) {
+    if (instance === true) {
+      return axios(config) as AxiosPromise<T>;
+    } else {
+      return instance(config) as AxiosPromise<T>;
+    }
+  }
+
   return config;
 }
 
