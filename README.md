@@ -252,6 +252,10 @@ https://codesandbox.io/s/react-request-hook-cache-9o2hz
 
 The `request` function allows you to define the response type coming from it. It also helps with creating a good pattern on defining your API calls and the expected results. It's just an identity function that accepts the request config and returns it. Both `useRequest` and `useResource` extract the expected and annotated type definition and resolve it on the `response.data` field.
 
+```ts
+export function request<T, D = any>(config: AxiosRequestConfig<D>): Resource<T, D>;
+```
+
 ```tsx
 const api = {
   getUsers: () => {
@@ -268,6 +272,19 @@ const api = {
     });
   },
 };
+```
+
+You can also make HTTP requests directly via `request`
+
+```ts
+function request<T, D = any>(config: AxiosRequestConfig<D>, instance: AxiosInstance | true): AxiosPromise<T>;
+```
+
+```ts
+const res = await request({ url: "/users" }, true);
+
+// custom axios instance
+const res = await request({ url: "/users" }, customIns);
 ```
 
 #### createRequestError

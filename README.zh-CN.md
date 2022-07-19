@@ -252,6 +252,10 @@ https://codesandbox.io/s/react-request-hook-cache-9o2hz
 
 `request` 作用于 Typescript 类型推导，便于识别 response 类型
 
+```ts
+export function request<T, D = any>(config: AxiosRequestConfig<D>): Resource<T, D>;
+```
+
 ```tsx
 const api = {
   getUsers: () => {
@@ -268,6 +272,19 @@ const api = {
     });
   },
 };
+```
+
+你也可以直接通过 `request` 函数直接发出 HTTP 请求
+
+```ts
+function request<T, D = any>(config: AxiosRequestConfig<D>, instance: AxiosInstance | true): AxiosPromise<T>;
+```
+
+```ts
+const res = await request({ url: "/users" }, true);
+
+// 自定义 axios instance
+const res = await request({ url: "/users" }, customIns);
 ```
 
 #### createRequestError
