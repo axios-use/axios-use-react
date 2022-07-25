@@ -25,7 +25,7 @@ export interface RequestFactory<TRequest extends Request> {
   (...args: Parameters<TRequest>): {
     cancel: Canceler;
     ready: () => Promise<
-      [Payload<TRequest>, AxiosResponse<unknown, CData<TRequest>>]
+      [Payload<TRequest>, AxiosResponse<Payload<TRequest>, CData<TRequest>>]
     >;
   };
 }
