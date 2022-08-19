@@ -1,3 +1,4 @@
+import React from "react";
 import {
   renderHook,
   originalRenderHook,
@@ -7,8 +8,9 @@ import {
   axios,
 } from "./utils";
 
-import type { Resource } from "../src";
+import type { Resource, RequestContextConfig } from "../src";
 import {
+  request,
   useResource,
   RequestProvider,
   wrapCache,
@@ -533,7 +535,7 @@ describe("useResource - cache", () => {
         ),
       {
         // eslint-disable-next-line react/display-name
-        wrapper: (props) => (
+        wrapper: (props: RequestContextConfig) => (
           <RequestProvider
             instance={axios}
             cache={mycache}
@@ -563,7 +565,7 @@ describe("useResource - cache", () => {
         ),
       {
         // eslint-disable-next-line react/display-name
-        wrapper: (props) => (
+        wrapper: (props: RequestContextConfig) => (
           <RequestProvider
             instance={axios}
             cache={mycache}
@@ -599,7 +601,7 @@ describe("useResource - cache", () => {
         ),
       {
         // eslint-disable-next-line react/display-name
-        wrapper: (props) => (
+        wrapper: (props: RequestContextConfig) => (
           <RequestProvider
             instance={axios}
             cache={mycache}
@@ -636,7 +638,7 @@ describe("useResource - cache", () => {
       () => useResource(() => reqConfig),
       {
         // eslint-disable-next-line react/display-name
-        wrapper: (props) => (
+        wrapper: (props: RequestContextConfig) => (
           <RequestProvider instance={axios} cache={mycache} {...props} />
         ),
       },
@@ -655,7 +657,7 @@ describe("useResource - cache", () => {
       () => useResource(() => reqConfig, undefined, { cacheKey: customKey }),
       {
         // eslint-disable-next-line react/display-name
-        wrapper: (props) => (
+        wrapper: (props: RequestContextConfig) => (
           <RequestProvider instance={axios} cache={mycache} {...props} />
         ),
       },
@@ -805,5 +807,104 @@ describe("useResource - custom instance", () => {
       expect(result.current[0].response?.status).toBe(200);
       expect(result.current[0].other?.status).toBe(200);
     });
+  });
+});
+
+describe("useResource - check types", () => {
+  const getUserReqConfig = (id: string) =>
+    request<{ id: string; name: string }>({
+      url: `/user/${id}`,
+      method: "get",
+    });
+
+  const callTimesFn = jest.fn();
+
+  beforeAll(() => {
+    mockAdapter.onGet(/\/user\/\w+/).reply((config) => {
+      const _id = config.url?.replace(/\/user\//, "").split("/")?.[0];
+      if (_id) {
+        callTimesFn();
+        return [200, { id: _id, name: `name${_id}` }];
+      }
+      return [404];
+    });
+  });
+
+  it("check types & refresh func", async () => {
+    const { result, waitFor, rerender } = renderHook((id: string) =>
+      useResource(getUserReqConfig, [id], {
+        filter: (p) => !!p,
+      }),
+    );
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+    expect(callTimesFn).toHaveBeenCalledTimes(0);
+
+    void act(() => {
+      result.current[1]("001");
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+    expect(callTimesFn).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(result.current[0].error).toBeUndefined();
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data?.id).toBe("001");
+      expect(result.current[0].data?.name).toBe("name001");
+      expect(callTimesFn).toHaveBeenCalledTimes(1);
+    });
+
+    void act(() => {
+      result.current[2]();
+    });
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data?.id).toBe("001");
+    expect(result.current[0].data?.name).toBe("name001");
+    expect(callTimesFn).toHaveBeenCalledTimes(1);
+
+    rerender("002");
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data?.id).toBe("001");
+    expect(result.current[0].data?.name).toBe("name001");
+    expect(callTimesFn).toHaveBeenCalledTimes(2);
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data?.id).toBe("002");
+      expect(result.current[0].data?.name).toBe("name002");
+      expect(callTimesFn).toHaveBeenCalledTimes(2);
+    });
+
+    void act(() => {
+      result.current[2]();
+    });
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data?.id).toBe("002");
+    expect(result.current[0].data?.name).toBe("name002");
+    expect(callTimesFn).toHaveBeenCalledTimes(3);
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data?.id).toBe("002");
+      expect(result.current[0].data?.name).toBe("name002");
+      expect(callTimesFn).toHaveBeenCalledTimes(3);
+    });
+
+    // void act(() => {
+    //   result.current[2]("003");
+    // });
+    // expect(result.current[0].isLoading).toBeTruthy();
+    // expect(result.current[0].data?.id).toBe("002");
+    // expect(result.current[0].data?.name).toBe("name002");
+    // expect(callTimesFn).toHaveBeenCalledTimes(4);
+    // await waitFor(() => {
+    //   expect(result.current[0].isLoading).toBeFalsy();
+    //   expect(result.current[0].data?.id).toBe("003");
+    //   expect(result.current[0].data?.name).toBe("name003");
+    //   expect(callTimesFn).toHaveBeenCalledTimes(4);
+    // });
   });
 });
