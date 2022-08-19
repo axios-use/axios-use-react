@@ -162,13 +162,13 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 
 ```tsx
 // js
-const [{ data, error, isLoading }, fetch] = useResource((id) => ({
+const [{ data, error, isLoading }, fetch, refresh] = useResource((id) => ({
   url: `/user/${id}`,
   method: "GET",
 }));
 
 // tsx
-const [reqState, fetch] = useResource((id: string) =>
+const [reqState, fetch, refresh] = useResource((id: string) =>
   // response.data: Result. AxiosResponse<Result>
   request<Result>({
     url: `/user/${id}`,
@@ -189,7 +189,12 @@ interface ReqState {
   cancel: Canceler;
 }
 
+// 不会调用 `options.filter` 函数
 type Fetch = (...args: Parameters<TRequest>) => Canceler;
+
+// 1. 与 `fetch` 函数类似, 但是没有传参, 保持使用 `useResource` 声明时传参
+// 2. 会调用 `options.filter` 函数进行过滤操作
+type Refresh = () => Canceler | undefined;
 ```
 
 将其参数作为依赖项传递给 `useResource`，根据参数变化自动触发请求
