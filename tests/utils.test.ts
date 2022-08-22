@@ -118,8 +118,11 @@ describe("getStrByFn", () => {
     expect(getStrByFn((a: string) => a, "demo")).toBe("demo");
     expect(getStrByFn((a: number, b: number) => a + b, 1, 2)).toBe(3);
     expect(getStrByFn((a: number) => a, 3.1415)).toBe(3.1415);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     expect(getStrByFn((a: number) => a, undefined as any)).toBeUndefined();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     expect(getStrByFn((a: number) => a, null as any)).toBeNull();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     expect(getStrByFn((a: number) => a, false as any)).toBeFalsy();
   });
 });

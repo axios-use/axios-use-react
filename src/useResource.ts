@@ -35,6 +35,7 @@ type RequestState<TRequest extends Request> = {
 export type UseResourceResult<TRequest extends Request> = [
   RequestState<TRequest> & { cancel: Canceler },
   RequestDispatcher<TRequest>,
+  () => Canceler | undefined,
 ];
 
 export type UseResourceOptions<T extends Request> = Pick<
@@ -177,19 +178,34 @@ export function useResource<TRequest extends Request>(
     [cacheKey, clear, createRequest, getMountedState],
   );
 
-  const requestRefFn = useRefFn(request);
   const filterRefFn = useRefFn(options?.filter);
+
+  const refresh = useCallback(
+    () => {
+      const _args = (requestParams || []) as Parameters<TRequest>;
+      const _filter =
+        typeof filterRefFn.current === "function"
+          ? filterRefFn.current(..._args)
+          : true;
+      if (_filter) {
+        return request(..._args);
+      }
+
+      return undefined;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestParams, request],
+  );
+
+  const refreshRefFn = useRefFn(refresh);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     let canceller: Canceler = () => {};
     if (requestParams) {
-      const filter =
-        typeof filterRefFn.current === "function"
-          ? filterRefFn.current(...requestParams)
-          : true;
-      if (filter) {
-        canceller = requestRefFn.current(...requestParams);
+      const _c = refreshRefFn.current();
+      if (_c) {
+        canceller = _c;
       }
     }
     return canceller;
@@ -202,7 +218,11 @@ export function useResource<TRequest extends Request>(
       clear(message);
     };
 
-    const result: UseResourceResult<TRequest> = [{ ...state, cancel }, request];
+    const result: UseResourceResult<TRequest> = [
+      { ...state, cancel },
+      request,
+      refresh,
+    ];
     return result;
-  }, [state, request, getMountedState, clear]);
+  }, [state, request, refresh, getMountedState, clear]);
 }

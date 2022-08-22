@@ -162,13 +162,13 @@ const [createRequest, { hasPending, cancel }] = useRequest(
 
 ```tsx
 // js
-const [{ data, error, isLoading }, fetch] = useResource((id) => ({
+const [{ data, error, isLoading }, fetch, refresh] = useResource((id) => ({
   url: `/user/${id}`,
   method: "GET",
 }));
 
 // tsx
-const [reqState, fetch] = useResource((id: string) =>
+const [reqState, fetch, refresh] = useResource((id: string) =>
   // response.data: Result. AxiosResponse<Result>
   request<Result>({
     url: `/user/${id}`,
@@ -189,7 +189,12 @@ interface ReqState {
   cancel: Canceler;
 }
 
+// `options.filter` will not be called
 type Fetch = (...args: Parameters<TRequest>) => Canceler;
+
+// 1. Same as `fetch`. But no parameters required. Inherit `useResource` parameters
+// 2. Will call `options.filter`
+type Refresh = () => Canceler | undefined;
 ```
 
 The request can also be triggered passing its arguments as dependencies to the _useResource_ hook.
