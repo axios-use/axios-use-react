@@ -1,3 +1,21 @@
+## [6.2.0](https://github.com/axios-use/react/compare/v6.1.0...v6.2.0) (2022-08-23)
+
+
+### Bug Fixes
+
+* **types:** ready return type (RequestFactory). ([1407056](https://github.com/axios-use/react/commit/140705628a9f503fde9aa3a47be6fae8ecfc49d0))
+
+
+### Features
+
+* **useResource:** return refresh func. ([f6e7692](https://github.com/axios-use/react/commit/f6e7692123a007c0a77f59bc9d8c8b32f52fc566))
+  ```diff
+  - const [reqState, fetch] = useResource();
+  + const [reqState, fetch, refresh] = useResource();
+  ```
+
+
+
 ## [6.1.0](https://github.com/axios-use/react/compare/v6.0.0...v6.1.0) (2022-07-05)
 
 
