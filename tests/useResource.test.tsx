@@ -892,19 +892,34 @@ describe("useResource - check types", () => {
       expect(result.current[0].data?.name).toBe("name002");
       expect(callTimesFn).toHaveBeenCalledTimes(3);
     });
+  });
 
-    // void act(() => {
-    //   result.current[2]("003");
-    // });
-    // expect(result.current[0].isLoading).toBeTruthy();
-    // expect(result.current[0].data?.id).toBe("002");
-    // expect(result.current[0].data?.name).toBe("name002");
-    // expect(callTimesFn).toHaveBeenCalledTimes(4);
-    // await waitFor(() => {
-    //   expect(result.current[0].isLoading).toBeFalsy();
-    //   expect(result.current[0].data?.id).toBe("003");
-    //   expect(result.current[0].data?.name).toBe("name003");
-    //   expect(callTimesFn).toHaveBeenCalledTimes(4);
-    // });
+  it("request function params required", async () => {
+    const getUserInfo = (params: { id: string }) => {
+      const { id } = params;
+      return request<{ id: string; name: string }>({
+        url: `/user/${id}`,
+        method: "get",
+      });
+    };
+
+    const { result, waitFor } = renderHook(() => useResource(getUserInfo));
+
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+
+    void act(() => {
+      result.current[1]({ id: "001" });
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data?.id).toBe("001");
+      expect(result.current[0].data?.name).toBe("name001");
+    });
   });
 });

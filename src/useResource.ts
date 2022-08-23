@@ -92,16 +92,21 @@ export function useResource<TRequest extends Request>(
   const RequestConfig =
     useContext<RequestContextValue<Payload<TRequest>>>(RequestContext);
 
-  const fnOptions = useDeepMemo(
-    fn(...(requestParams || [])) as Resource<
-      Payload<TRequest>,
-      CData<TRequest>
-    >,
-  );
+  const fnOptions = useMemo(() => {
+    try {
+      return fn(...(requestParams || [])) as Resource<
+        Payload<TRequest>,
+        CData<TRequest>
+      >;
+    } catch (error) {
+      return undefined;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, useDeepMemo([fn, requestParams]));
   const requestCache = useMemo(() => {
     const filter = options?.cacheFilter || RequestConfig.cacheFilter;
     if (filter && typeof filter === "function") {
-      if (filter(fnOptions)) {
+      if (fnOptions && filter(fnOptions)) {
         return options?.cache ?? RequestConfig.cache;
       }
       return undefined;
@@ -125,6 +130,7 @@ export function useResource<TRequest extends Request>(
   const cacheKey = useMemo(() => {
     return (
       (requestCache &&
+        fnOptions &&
         (getStrByFn(options?.cacheKey, fnOptions) ??
           getStrByFn(RequestConfig.cacheKey, fnOptions))) ||
       undefined
