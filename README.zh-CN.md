@@ -15,6 +15,8 @@
 <p align="center">
 <a href="https://www.npmjs.com/package/@axios-use/react" target="__blank"><img src="https://img.shields.io/npm/v/@axios-use/react.svg" alt="NPM version"></a>
 <a href="https://www.npmjs.com/package/@react-cmpt/react-request-hook" target="__blank"><img src="https://img.shields.io/badge/old%20version-v5.1.0-inactive.svg" alt="NPM old version"></a>
+<a href="https://packagephobia.com/result?p=%40axios-use%2Freact" target="__blank"><img src="https://badgen.net/packagephobia/install/@axios-use/react" alt="install size"></a>
+<a href="https://bundlephobia.com/package/@axios-use/react" target="__blank"><img src="https://badgen.net/bundlephobia/minzip/@axios-use/react" alt="minzipped size"></a>
 <a href="https://github.com/axios-use/react/actions?query=workflow%3ACI" target="__blank"><img src="https://github.com/axios-use/react/workflows/CI/badge.svg" alt="ci"></a>
 <a href="https://github.com/axios-use/react/blob/main/LICENSE" target="__blank"><img src="https://img.shields.io/github/license/axios-use/react" alt="license"></a>
 </p>
