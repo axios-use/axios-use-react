@@ -266,13 +266,21 @@ const api = {
     });
   },
 
-  getUserPosts: (userId: string) => {
+  getUserInfo: (userId: string) => {
     return request<UserInfo>({
       url: `/users/${userId}`,
       method: "GET",
     });
   },
 };
+```
+
+You can also use these `request` functions directly in `axios`.
+
+```ts
+const usersRes = await axios(api.getUsers());
+
+const userRes = await axios(api.getUserInfo("ID001"));
 ```
 
 #### createRequestError

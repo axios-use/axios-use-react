@@ -266,13 +266,21 @@ const api = {
     });
   },
 
-  getUserPosts: (userId: string) => {
+  getUserInfo: (userId: string) => {
     return request<UserInfo>({
       url: `/users/${userId}`,
       method: "GET",
     });
   },
 };
+```
+
+当然你也可以直接使用 `axios` 调用 `request` 方法
+
+```ts
+const usersRes = await axios(api.getUsers());
+
+const userRes = await axios(api.getUserInfo("ID001"));
 ```
 
 #### createRequestError
