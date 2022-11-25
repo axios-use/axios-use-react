@@ -2,8 +2,11 @@
   "moduleFileExtensions": ["js", "jsx", "ts", "tsx"],
   "rootDir": ".",
   "preset": "ts-jest",
-  "testEnvironment": "node",
+  "testEnvironment": "jsdom",
   "collectCoverageFrom": ["src/**/*"],
+  "moduleNameMapper": {
+    "^axios$": "axios/dist/axios"
+  },
   "globals": {
     "ts-jest": {
       "tsconfig": "tsconfig.test.json"
