@@ -1,3 +1,17 @@
+## [6.3.0](https://github.com/axios-use/react/compare/v6.2.0...v6.3.0) (2022-12-05)
+
+
+### Bug Fixes
+
+* **useResource:** catch `fnOptions` undefined error. ([bd74a59](https://github.com/axios-use/react/commit/bd74a59bb100543190a935c65d194983ecc5cfa7))
+
+
+### Chore
+
+* Upgrade devDependencies. (axios v1 [#17](https://github.com/axios-use/react/pull/17))
+
+
+
 ## [6.2.0](https://github.com/axios-use/react/compare/v6.1.0...v6.2.0) (2022-08-23)
 
 
