@@ -69,12 +69,12 @@ export function createRequestError<
   const axiosErr = error as unknown as AxiosError<T, D>;
   const axiosRes = error as unknown as AxiosResponse<T, D>;
 
-  const data = axiosErr?.response?.data || axiosRes?.data;
+  const data = axiosErr?.response?.data ?? axiosRes?.data;
   const code =
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    ((data as any)?.code as string) ||
-    axiosErr?.code ||
-    axiosErr?.response?.status ||
+    ((data as any)?.code as string) ??
+    axiosErr?.code ??
+    axiosErr?.response?.status ??
     axiosRes?.status;
 
   const message =
