@@ -13,7 +13,7 @@ import type {
   RequestCallbackFn,
   Request,
   Payload,
-  CData,
+  BodyData,
 } from "./request";
 import { createRequestError } from "./request";
 import { RequestContext } from "./requestContext";
@@ -33,10 +33,10 @@ export type UseRequestResult<TRequest extends Request> = [
   },
 ];
 
-export function useRequest<TRequest extends Request>(
-  fn: TRequest,
-  options?: UseRequestOptions<TRequest>,
-): UseRequestResult<TRequest> {
+export function useRequest<T extends Request>(
+  fn: T,
+  options?: UseRequestOptions<T>,
+): UseRequestResult<T> {
   const getMountedState = useMountedState();
   const RequestConfig = useContext(RequestContext);
   const axiosInstance = options?.instance || RequestConfig.instance || axios;
@@ -63,7 +63,7 @@ export function useRequest<TRequest extends Request>(
   const callFn = useRefFn(fn);
 
   const request = useCallback(
-    (...args: Parameters<TRequest>) => {
+    (...args: Parameters<T>) => {
       const config = callFn.current(...args);
       const source = axios.CancelToken.source();
 
@@ -72,15 +72,13 @@ export function useRequest<TRequest extends Request>(
           setSources((prevSources) => [...prevSources, source]);
         }
         return axiosInstance({ ...config, cancelToken: source.token })
-          .then(
-            (response: AxiosResponse<Payload<TRequest>, CData<TRequest>>) => {
-              removeCancelToken(source.token);
+          .then((response: AxiosResponse<Payload<T>, BodyData<T>>) => {
+            removeCancelToken(source.token);
 
-              onCompletedRef.current?.(response.data, response);
-              return [response.data, response];
-            },
-          )
-          .catch((err: AxiosError<Payload<TRequest>, CData<TRequest>>) => {
+            onCompletedRef.current?.(response.data, response);
+            return [response.data, response];
+          })
+          .catch((err: AxiosError<Payload<T>, BodyData<T>>) => {
             removeCancelToken(source.token);
 
             const error = customCreateReqError
@@ -90,7 +88,7 @@ export function useRequest<TRequest extends Request>(
             onErrorRef.current?.(error);
 
             throw error;
-          }) as Promise<[Payload<TRequest>, AxiosResponse<CData<TRequest>>]>;
+          }) as Promise<[Payload<T>, AxiosResponse<BodyData<T>>]>;
       };
 
       return {

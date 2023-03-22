@@ -3,7 +3,7 @@ import type { Canceler, AxiosResponse } from "axios";
 import { useRequest } from "./useRequest";
 import type {
   Payload,
-  CData,
+  BodyData,
   RequestError,
   Request,
   RequestDispatcher,
@@ -24,12 +24,12 @@ const REQUEST_CLEAR_MESSAGE =
 
 type RequestState<TRequest extends Request> = {
   data?: Payload<TRequest>;
-  response?: AxiosResponse<CData<TRequest>>;
-  error?: RequestError<Payload<TRequest>, CData<TRequest>>;
+  response?: AxiosResponse<BodyData<TRequest>>;
+  error?: RequestError<Payload<TRequest>, BodyData<TRequest>>;
   isLoading?: boolean;
 
   /** @deprecated Use `response` instead */
-  other?: AxiosResponse<CData<TRequest>>;
+  other?: AxiosResponse<BodyData<TRequest>>;
 };
 
 export type UseResourceResult<TRequest extends Request> = [
@@ -69,7 +69,7 @@ type Action<T, D = any> =
 
 function getNextState<TRequest extends Request>(
   state: RequestState<TRequest>,
-  action: Action<Payload<TRequest>, CData<TRequest>>,
+  action: Action<Payload<TRequest>, BodyData<TRequest>>,
 ): RequestState<TRequest> {
   const response = action.type === "success" ? action.response : state.response;
 
@@ -83,21 +83,18 @@ function getNextState<TRequest extends Request>(
   };
 }
 
-export function useResource<TRequest extends Request>(
-  fn: TRequest,
-  requestParams?: Parameters<TRequest> | false,
-  options?: UseResourceOptions<TRequest>,
-): UseResourceResult<TRequest> {
+export function useResource<T extends Request>(
+  fn: T,
+  requestParams?: Parameters<T> | false,
+  options?: UseResourceOptions<T>,
+): UseResourceResult<T> {
   const getMountedState = useMountedState();
   const RequestConfig =
-    useContext<RequestContextValue<Payload<TRequest>>>(RequestContext);
+    useContext<RequestContextValue<Payload<T>>>(RequestContext);
 
   const fnOptions = useMemo(() => {
     try {
-      return fn(...(requestParams || [])) as Resource<
-        Payload<TRequest>,
-        CData<TRequest>
-      >;
+      return fn(...(requestParams || [])) as Resource<Payload<T>, BodyData<T>>;
     } catch (error) {
       return undefined;
     }
@@ -149,12 +146,12 @@ export function useResource<TRequest extends Request>(
   });
   const [state, dispatch] = useReducer(getNextState, {
     data: cacheData,
-    isLoading: getDefaultStateLoading<TRequest>(requestParams, options?.filter),
+    isLoading: getDefaultStateLoading<T>(requestParams, options?.filter),
     ...options?.defaultState,
   });
 
   const request = useCallback(
-    (...args: Parameters<TRequest>) => {
+    (...args: Parameters<T>) => {
       clear(REQUEST_CLEAR_MESSAGE);
       const { ready, cancel } = createRequest(...args);
 
@@ -171,7 +168,7 @@ export function useResource<TRequest extends Request>(
               requestCache.set(cacheKey, data);
           }
         } catch (e) {
-          const error = e as RequestError<Payload<TRequest>, CData<TRequest>>;
+          const error = e as RequestError<Payload<T>, BodyData<T>>;
           if (getMountedState() && !error.isCancel) {
             dispatch({ type: "error", error });
           }
@@ -188,7 +185,7 @@ export function useResource<TRequest extends Request>(
 
   const refresh = useCallback(
     () => {
-      const _args = (requestParams || []) as Parameters<TRequest>;
+      const _args = (requestParams || []) as Parameters<T>;
       const _filter =
         typeof filterRefFn.current === "function"
           ? filterRefFn.current(..._args)
@@ -224,7 +221,7 @@ export function useResource<TRequest extends Request>(
       clear(message);
     };
 
-    const result: UseResourceResult<TRequest> = [
+    const result: UseResourceResult<T> = [
       { ...state, cancel },
       request,
       refresh,

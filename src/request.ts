@@ -18,20 +18,20 @@ export interface Resource<TPayload, D = any> extends AxiosRequestConfig<D> {
 
 export type Request<T = any, D = any> = (...args: any[]) => Resource<T, D>;
 
-export type Payload<TRequest extends Request> = ReturnType<TRequest>["payload"];
-export type CData<TRequest extends Request> = ReturnType<TRequest>["data"];
+export type Payload<T extends Request> = ReturnType<T>["payload"];
+export type BodyData<T extends Request> = ReturnType<T>["data"];
+/** @deprecated No longer use. Use `BodyData` instead */
+export type CData<T extends Request> = BodyData<T>;
 
-export interface RequestFactory<TRequest extends Request> {
-  (...args: Parameters<TRequest>): {
+export interface RequestFactory<T extends Request> {
+  (...args: Parameters<T>): {
     cancel: Canceler;
-    ready: () => Promise<
-      [Payload<TRequest>, AxiosResponse<Payload<TRequest>, CData<TRequest>>]
-    >;
+    ready: () => Promise<[Payload<T>, AxiosResponse<Payload<T>, BodyData<T>>]>;
   };
 }
 
-export interface RequestDispatcher<TRequest extends Request> {
-  (...args: Parameters<TRequest>): Canceler;
+export interface RequestDispatcher<T extends Request> {
+  (...args: Parameters<T>): Canceler;
 }
 
 // Normalize the error response returned from our hooks
@@ -47,12 +47,12 @@ export interface RequestError<
   original: E;
 }
 
-export type RequestCallbackFn<TRequest extends Request> = {
+export type RequestCallbackFn<T extends Request> = {
   onCompleted?: (
-    data: Payload<TRequest>,
-    response: AxiosResponse<CData<TRequest>>,
+    data: Payload<T>,
+    response: AxiosResponse<BodyData<T>>,
   ) => void;
-  onError?: (err?: RequestError<Payload<TRequest>, CData<TRequest>>) => void;
+  onError?: (err?: RequestError<Payload<T>, BodyData<T>>) => void;
 };
 
 export function request<T, D = any>(
