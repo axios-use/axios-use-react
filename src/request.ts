@@ -49,8 +49,8 @@ export interface RequestError<
 
 export type RequestCallbackFn<TRequest extends Request> = {
   onCompleted?: (
-    data?: Payload<TRequest>,
-    response?: AxiosResponse<CData<TRequest>>,
+    data: Payload<TRequest>,
+    response: AxiosResponse<CData<TRequest>>,
   ) => void;
   onError?: (err?: RequestError<Payload<TRequest>, CData<TRequest>>) => void;
 };
