@@ -1,3 +1,21 @@
+## [6.4.0](https://github.com/axios-use/react/compare/v6.3.0...v6.4.0) (2022-03-26)
+
+
+### Bug Fixes
+
+* **createRequestError:** value num 0. ([84a3084](https://github.com/axios-use/react/commit/84a3084c49be5175fcbeb72c9c987cc6ba46c3be))
+
+
+### Features
+
+* **cache:** use ttl cache by default. ([#19](https://github.com/axios-use/react/pull/19))
+* **onCompleted types:** parameters is required. ([96f1f8d](https://github.com/axios-use/react/commit/96f1f8d8fd7b8a2b245fb310ff09a9c6d5baa6ad))
+* **CData type:** replace `CData` width `BodyData`. ([5f26f42](https://github.com/axios-use/react/commit/5f26f4221e120e9e7ecae362f4ef303601a3a825))
+
+  No BREAKING CHANGES. Will keep `CData` type, but deprecated.
+
+
+
 ## [6.3.0](https://github.com/axios-use/react/compare/v6.2.0...v6.3.0) (2022-12-05)
 
 
