@@ -1,4 +1,4 @@
-## [6.4.0](https://github.com/axios-use/react/compare/v6.4.0...v6.4.1) (2023-04-23)
+## [6.4.1](https://github.com/axios-use/react/compare/v6.4.0...v6.4.1) (2023-04-23)
 
 
 ### Bug Fixes
