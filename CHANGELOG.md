@@ -1,4 +1,13 @@
-## [6.4.0](https://github.com/axios-use/react/compare/v6.3.0...v6.4.0) (2022-03-26)
+## [6.4.0](https://github.com/axios-use/react/compare/v6.4.0...v6.4.1) (2023-04-23)
+
+
+### Bug Fixes
+
+* **type:** `onCompleted` response generic error. ([aed68bf](https://github.com/axios-use/react/commit/aed68bfb8b5072a77197c29edd1c5b8773cc5ed8))
+
+
+
+## [6.4.0](https://github.com/axios-use/react/compare/v6.3.0...v6.4.0) (2023-03-26)
 
 
 ### Bug Fixes
