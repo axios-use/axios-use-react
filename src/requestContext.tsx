@@ -5,7 +5,7 @@ import type { AxiosInstance } from "axios";
 
 import type { RequestError } from "./request";
 import type { Cache, CacheKeyFn, CacheFilter } from "./cache";
-import { createCacheKey, wrapCache } from "./cache";
+import { defaultCacheKeyGenerator, wrapCache } from "./cache";
 import { _ttlcache } from "./cachettl";
 
 export type RequestContextConfig<T = any, E = any> = {
@@ -22,7 +22,7 @@ const cache = wrapCache(_ttlcache);
 
 const defaultConfig: RequestContextConfig = {
   cache,
-  cacheKey: createCacheKey,
+  cacheKey: defaultCacheKeyGenerator,
 };
 
 export const RequestContext = createContext<RequestContextValue>(defaultConfig);
