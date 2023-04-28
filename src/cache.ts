@@ -1,3 +1,6 @@
+import { hash } from "object-code";
+import type { Method } from "axios";
+
 import type { Resource } from "./request";
 
 export type CacheKey = string | number;
@@ -11,20 +14,29 @@ export interface Cache<T = any> {
   clear(): void;
 }
 
-export function createCacheKey<T = any, D = any>(
+const SLASHES_REGEX = /^\/|\/$/g;
+
+export const defaultCacheKeyGenerator = <T = any, D = any>(
   config: Resource<T, D>,
-): CacheKey {
-  return JSON.stringify(config, [
-    "url",
-    "method",
-    "baseURL",
-    "headers",
-    "params",
-    "data",
-    "auth",
-    "proxy",
-  ]);
-}
+): CacheKey => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const { url, method, baseURL, headers, data, params } = config;
+  const _baseURL = baseURL ? baseURL.replace(SLASHES_REGEX, "") : baseURL;
+  const _url = url ? url.replace(SLASHES_REGEX, "") : url;
+  const _method = method ? (method.toLowerCase() as Method) : method;
+
+  return hash({
+    url: _url,
+    method: _method,
+    baseURL: _baseURL,
+    headers,
+    data,
+    params: params as unknown,
+  });
+};
+
+/** @deprecated Use `defaultCacheKeyGenerator` instead */
+export const createCacheKey = null;
 
 export function wrapCache<T = any>(provider: Cache<T>): Cache {
   return provider;

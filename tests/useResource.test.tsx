@@ -14,7 +14,7 @@ import {
   useResource,
   RequestProvider,
   wrapCache,
-  createCacheKey,
+  defaultCacheKeyGenerator,
 } from "../src";
 
 const okResponse = { code: 0, data: [1, 2], message: null };
@@ -650,7 +650,9 @@ describe("useResource - cache", () => {
 
     await waitForNextUpdate();
     expect(result.current[0].data).toStrictEqual(rtnData);
-    expect(mycache.get(createCacheKey(reqConfig))).toStrictEqual(rtnData);
+    expect(mycache.get(defaultCacheKeyGenerator(reqConfig))).toStrictEqual(
+      rtnData,
+    );
 
     const customKey = () => "demoKey";
     const req01 = originalRenderHook(
@@ -670,7 +672,7 @@ describe("useResource - cache", () => {
     await req01.waitForNextUpdate();
     expect(result.current[0].data).toStrictEqual(rtnData);
     expect(mycache.get(customKey())).toStrictEqual(rtnData);
-    expect(customKey()).not.toStrictEqual(createCacheKey(reqConfig));
+    expect(customKey()).not.toStrictEqual(defaultCacheKeyGenerator(reqConfig));
   });
 
   it("close cache", async () => {
