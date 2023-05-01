@@ -51,6 +51,14 @@ describe("createRequestError", () => {
     };
     expect(createRequestError(err3 as any).code).toEqual(400);
     expect(createRequestError(err3 as any).data).toBeUndefined();
+    expect(createRequestError(err3 as any).original).toStrictEqual(err3);
+
+    const err4 = {
+      status: 400,
+    };
+    expect(createRequestError(err4 as any).code).toEqual(400);
+    expect(createRequestError(err4 as any).data).toBeUndefined();
+    expect(createRequestError(err4 as any).original).toStrictEqual(err4);
 
     expect(createRequestError(undefined as any).code).toBeUndefined();
     expect(createRequestError(undefined as any).data).toBeUndefined();
