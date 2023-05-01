@@ -21,3 +21,6 @@ jest.json
 .prettier*
 .eslintrc.json
 .eslintignore
+.npmrc
+package-lock.json
+yarn.lock
