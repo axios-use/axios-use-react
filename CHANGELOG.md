@@ -1,3 +1,12 @@
+## [6.4.2](https://github.com/axios-use/react/compare/v6.4.1...v6.4.2) (2023-05-04)
+
+
+### Features
+
+* **refactor(cache-key):** replace with `object-code` to generate cache key. ([#20](https://github.com/axios-use/axios-use-react/pull/20))
+
+
+
 ## [6.4.1](https://github.com/axios-use/react/compare/v6.4.0...v6.4.1) (2023-04-23)
 
 
