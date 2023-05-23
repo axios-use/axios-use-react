@@ -14,7 +14,7 @@ export interface Cache<T = any> {
   clear(): void;
 }
 
-const SLASHES_REGEX = /^\/|\/$/g;
+const SLASHES_REGEX = /(?:^\/)|(?:\/$)/g;
 
 export const defaultCacheKeyGenerator = <T = any, D = any>(
   config: Resource<T, D>,
