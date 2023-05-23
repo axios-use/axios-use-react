@@ -1,6 +1,5 @@
-import React from "react";
+import React, { createContext, useMemo } from "react";
 import type { PropsWithChildren } from "react";
-import { createContext } from "react";
 import type { AxiosInstance } from "axios";
 
 import type { RequestError } from "./request";
@@ -41,16 +40,13 @@ export const RequestProvider = <T,>(
     ...rest
   } = props;
 
+  const providerValue = useMemo(
+    () => ({ instance, cache, cacheKey, cacheFilter, customCreateReqError }),
+    [cache, cacheFilter, cacheKey, customCreateReqError, instance],
+  );
+
   return (
-    <RequestContext.Provider
-      value={{
-        instance,
-        cache,
-        cacheKey,
-        cacheFilter,
-        customCreateReqError,
-      }}
-      {...rest}>
+    <RequestContext.Provider value={providerValue} {...rest}>
       {children}
     </RequestContext.Provider>
   );
