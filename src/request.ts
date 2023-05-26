@@ -12,29 +12,56 @@ export type AxiosRestResponse<D = any> = Omit<
   "data"
 >;
 
-export interface Resource<TPayload, D = any> extends AxiosRequestConfig<D> {
-  payload?: TPayload;
+export interface Resource<
+  T = AxiosResponse,
+  D = any,
+  K1 extends keyof T = never,
+  K2 extends keyof T[K1] = never,
+  K3 extends keyof T[K1][K2] = never,
+> extends AxiosRequestConfig<D> {
+  _payload?: T;
+  _payload_item?: [K3] extends [never]
+    ? [K2] extends [never]
+      ? [K1] extends [never]
+        ? T extends AxiosResponse<infer DD> | { data?: infer DD }
+          ? DD
+          : undefined
+        : T[K1]
+      : T[K1][K2]
+    : T[K1][K2][K3];
 }
 
-export type Request<T = any, D = any> = (...args: any[]) => Resource<T, D>;
+export type Request<
+  T = any,
+  D = any,
+  K1 extends keyof T = any,
+  K2 extends keyof T[K1] = any,
+  K3 extends keyof T[K1][K2] = any,
+> = (...args: any[]) => Resource<T, D, K1, K2, K3>;
 
-export type Payload<T extends Request> = ReturnType<T>["payload"];
-export type BodyData<T extends Request> = ReturnType<T>["data"];
+type _AnyKeyValue<T, K> = K extends keyof T ? T[K] : any;
+
+export type Payload<T extends Request, Check = false> = Check extends true
+  ? _AnyKeyValue<ReturnType<T>, "_payload_item">
+  : T extends Request<AxiosResponse>
+  ? Exclude<_AnyKeyValue<ReturnType<T>, "_payload">, undefined>
+  : _AnyKeyValue<ReturnType<T>, "_payload">;
+export type BodyData<T extends Request> = _AnyKeyValue<ReturnType<T>, "data">;
 /** @deprecated No longer use. Use `BodyData` instead */
 export type CData<T extends Request> = BodyData<T>;
 
-export interface RequestFactory<T extends Request> {
-  (...args: Parameters<T>): {
-    cancel: Canceler;
-    ready: () => Promise<[Payload<T>, AxiosResponse<Payload<T>, BodyData<T>>]>;
-  };
-}
+export type RequestFactory<T extends Request> = (...args: Parameters<T>) => {
+  cancel: Canceler;
+  ready: () => Promise<readonly [Payload<T, true>, Payload<T>]>;
+};
 
-export interface RequestDispatcher<T extends Request> {
-  (...args: Parameters<T>): Canceler;
-}
+export type RequestDispatcher<T extends Request> = (
+  ...args: Parameters<T>
+) => Canceler;
 
-// Normalize the error response returned from our hooks
+/**
+ * Normalize the error response returned from `@axios-use/vue`
+ */
 export interface RequestError<
   T = any,
   D = any,
@@ -48,18 +75,36 @@ export interface RequestError<
 }
 
 export type RequestCallbackFn<T extends Request> = {
-  onCompleted?: (
-    data: Payload<T>,
-    response: AxiosResponse<Payload<T>, BodyData<T>>,
-  ) => void;
-  onError?: (err?: RequestError<Payload<T>, BodyData<T>>) => void;
+  /**
+   * A callback function that's called when your request successfully completes with zero errors.
+   * This function is passed the request's result `data` and `response`.
+   */
+  onCompleted?: (data: Payload<T, true>, response: Payload<T>) => void;
+  /**
+   * A callback function that's called when the request encounters one or more errors.
+   * This function is passed an `RequestError` object that contains either a networkError object or a `AxiosError`, depending on the error(s) that occurred.
+   */
+  onError?: (err: RequestError<Payload<T>, BodyData<T>>) => void;
 };
 
-export function request<T, D = any>(
-  config: AxiosRequestConfig<D>,
-): Resource<T, D> {
+/**
+ * For TypeScript type deduction
+ */
+export function _request<
+  T,
+  D = any,
+  K1 extends keyof T = never,
+  K2 extends keyof T[K1] = never,
+  K3 extends keyof T[K1][K2] = never,
+>(config: AxiosRequestConfig<D>): Resource<T, D, K1, K2, K3> {
   return config;
 }
+
+/**
+ * For TypeScript type deduction
+ */
+export const request = <T = any, D = any>(config: AxiosRequestConfig<D>) =>
+  _request<AxiosResponse<T, D>, D>(config);
 
 export function createRequestError<
   T = any,
