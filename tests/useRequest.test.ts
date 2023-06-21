@@ -1,4 +1,4 @@
-import type { AxiosError } from "axios";
+import type { AxiosError, AxiosResponse } from "axios";
 import {
   renderHook,
   originalRenderHook,
@@ -6,15 +6,17 @@ import {
   act,
   cache,
   axios,
+  expectTypeShell,
 } from "./utils";
 
 import type { RequestError } from "../src";
-import { useRequest } from "../src";
+import { useRequest, request, _request } from "../src";
 
 const okResponse = { code: 0, data: [1, 2], message: null };
 const okResponse2 = { code: 0, data: "res2", message: null };
 const errResponse = { code: 2001, data: [3, 4], message: "some error" };
 const errResponse2 = { code: 2001, data: [3, 4], msg: "some error" };
+type ResOK1Type = typeof okResponse;
 
 describe("useRequest", () => {
   beforeAll(() => {
@@ -211,6 +213,47 @@ describe("useRequest", () => {
         expect(onError).toHaveBeenCalledTimes(1);
         expect(onError).toHaveBeenCalledWith(error);
       }
+    });
+  });
+
+  it("width type", async () => {
+    const { result } = renderHook(() =>
+      useRequest(() => request<ResOK1Type>({ url: "/users", method: "GET" })),
+    );
+    await act(async () => {
+      const [data, res] = await result.current[0]().ready();
+      expect(
+        expectTypeShell(data).type<ResOK1Type | undefined>(),
+      ).toStrictEqual(okResponse);
+      expect(
+        expectTypeShell(res).type<AxiosResponse<ResOK1Type>>(),
+      ).toBeDefined();
+      expect(expectTypeShell(res.data).type<ResOK1Type>()).toStrictEqual(
+        okResponse,
+      );
+      expect(res?.status).toBe(200);
+    });
+  });
+
+  it("custom response type", async () => {
+    const { result } = renderHook(() =>
+      useRequest(() =>
+        _request<AxiosResponse<ResOK1Type["data"]>, any, "data">({
+          url: "/users",
+          method: "GET",
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          transformResponse: (r) => r.data,
+        }),
+      ),
+    );
+    await act(async () => {
+      const [data, res] = await result.current[0]().ready();
+      expect(expectTypeShell(data).type<number[] | undefined>()).toStrictEqual(
+        okResponse.data,
+      );
+      expect(
+        expectTypeShell(res).type<AxiosResponse<ResOK1Type["data"]>>().data,
+      ).toStrictEqual(okResponse.data);
     });
   });
 });
