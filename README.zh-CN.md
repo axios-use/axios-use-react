@@ -285,6 +285,24 @@ const usersRes = await axios(api.getUsers());
 const userRes = await axios(api.getUserInfo("ID001"));
 ```
 
+自定义 response 类型. (如果你有手动修改 response 数据的需求。 axios.interceptors.response)
+
+```ts
+import { request, _request } from "@axios-use/react";
+const [reqState] = useResource(() => request<DataType>({ url: `/users` }), []);
+// AxiosResponse<DataType>
+reqState.response;
+// DataType
+reqState.data;
+
+// 自定义 response 类型
+const [reqState] = useResource(() => _request<MyWrapper<DataType>>({ url: `/users` }), []);
+// MyWrapper<DataType>
+reqState.response;
+// MyWrapper<DataType>["data"]. maybe `undefined` type.
+reqState.data;
+```
+
 #### createRequestError
 
 `createRequestError` 用于规范错误响应（该函数也默认在内部调用）。 `isCancel` 标志被返回，因此也不必在 promise catch 块上调用 **axios.isCancel**。

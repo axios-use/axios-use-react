@@ -285,6 +285,24 @@ const usersRes = await axios(api.getUsers());
 const userRes = await axios(api.getUserInfo("ID001"));
 ```
 
+custom response type. (if you change the response's return value. like axios.interceptors.response)
+
+```ts
+import { request, _request } from "@axios-use/react";
+const [reqState] = useResource(() => request<DataType>({ url: `/users` }), []);
+// AxiosResponse<DataType>
+reqState.response;
+// DataType
+reqState.data;
+
+// custom response type
+const [reqState] = useResource(() => _request<MyWrapper<DataType>>({ url: `/users` }), []);
+// MyWrapper<DataType>
+reqState.response;
+// MyWrapper<DataType>["data"]. maybe `undefined` type.
+reqState.data;
+```
+
 #### createRequestError
 
 The `createRequestError` normalizes the error response. This function is used internally as well. The `isCancel` flag is returned, so you don't have to call **axios.isCancel** later on the promise catch block.
