@@ -77,7 +77,7 @@ function getNextState<TRequest extends Request>(
     data: action.type === "success" ? action.data : state.data,
     response,
     error: action.type === "error" ? action.error : undefined,
-    isLoading: action.type === "start" ? true : false,
+    isLoading: action.type === "start",
     // will be deleted
     other: response,
   };
@@ -96,27 +96,27 @@ export function useResource<T extends Request>(
     try {
       return fn(...(requestParams || [])) as Resource<Payload<T>, BodyData<T>>;
     } catch (error) {
-      return undefined;
+      return null;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, useDeepMemo([fn, requestParams]));
   const requestCache = useMemo(() => {
     const filter = options?.cacheFilter || RequestConfig.cacheFilter;
-    if (filter && typeof filter === "function") {
-      if (fnOptions && filter(fnOptions)) {
-        return options?.cache ?? RequestConfig.cache;
-      }
-      return undefined;
+    const _cache = options?.cache ?? RequestConfig.cache;
+    if (_cache == undefined) {
+      return null;
     }
 
-    if (
-      fnOptions?.method === null ||
-      fnOptions?.method === undefined ||
-      /^get$/i.test(fnOptions.method)
-    ) {
-      return options?.cache ?? RequestConfig.cache;
+    if (filter && typeof filter === "function") {
+      if (fnOptions && filter(fnOptions)) {
+        return _cache;
+      }
     }
-    return undefined;
+
+    if (fnOptions?.method == null || /^get$/i.test(fnOptions.method)) {
+      return _cache;
+    }
+    return null;
   }, [
     RequestConfig.cache,
     RequestConfig.cacheFilter,
@@ -130,14 +130,15 @@ export function useResource<T extends Request>(
         fnOptions &&
         (getStrByFn(options?.cacheKey, fnOptions) ??
           getStrByFn(RequestConfig.cacheKey, fnOptions))) ||
-      undefined
+      null
     );
   }, [RequestConfig.cacheKey, fnOptions, options?.cacheKey, requestCache]);
   const cacheData = useMemo(() => {
     if (requestCache && cacheKey && typeof requestCache.get === "function") {
-      return (requestCache.get(cacheKey) as Payload<T, true>) ?? undefined;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return requestCache.get(cacheKey) as Payload<T, true>;
     }
-    return undefined;
+    return null;
   }, [cacheKey, requestCache]);
 
   const [createRequest, { clear }] = useRequest(fn, {
@@ -146,7 +147,7 @@ export function useResource<T extends Request>(
     instance: options?.instance,
   });
   const [state, dispatch] = useReducer(getNextState, {
-    data: cacheData,
+    data: cacheData ?? undefined,
     isLoading: getDefaultStateLoading<T>(requestParams, options?.filter),
     ...options?.defaultState,
   });
@@ -204,8 +205,7 @@ export function useResource<T extends Request>(
   const refreshRefFn = useRefFn(refresh);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    let canceller: Canceler = () => {};
+    let canceller: Canceler = () => undefined;
     if (requestParams) {
       const _c = refreshRefFn.current();
       if (_c) {
