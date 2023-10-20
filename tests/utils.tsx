@@ -45,6 +45,24 @@ function customRenderHook<P, R>(
 
 export * from "@testing-library/react-hooks";
 
+type Equal<Left, Right> = [Left] extends [Right]
+  ? [Right] extends [Left]
+    ? true
+    : false
+  : false;
+type MismatchArgs<B extends boolean, C extends boolean> = Equal<
+  B,
+  C
+> extends true
+  ? []
+  : [never];
+
+export const expectTypeShell = <R,>(
+  r: R,
+): { type<T>(...args: MismatchArgs<Equal<R, T>, true>): R } => ({
+  type: () => r,
+});
+
 export {
   customRenderHook as renderHook,
   mockAdapter,

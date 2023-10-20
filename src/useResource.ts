@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useContext, useReducer, useMemo } from "react";
-import type { Canceler, AxiosResponse } from "axios";
+import type { Canceler } from "axios";
 import { useRequest } from "./useRequest";
 import type {
   Payload,
@@ -22,19 +22,19 @@ import { useDeepMemo, useMountedState, useRefFn, getStrByFn } from "./utils";
 const REQUEST_CLEAR_MESSAGE =
   "A new request has been made before completing the last one";
 
-type RequestState<TRequest extends Request> = {
-  data?: Payload<TRequest>;
-  response?: AxiosResponse<BodyData<TRequest>>;
-  error?: RequestError<Payload<TRequest>, BodyData<TRequest>>;
+type RequestState<T extends Request> = {
+  data?: Payload<T, true>;
+  response?: Payload<T>;
+  error?: RequestError<Payload<T>, BodyData<T>>;
   isLoading?: boolean;
 
   /** @deprecated Use `response` instead */
-  other?: AxiosResponse<BodyData<TRequest>>;
+  other?: Payload<T>;
 };
 
-export type UseResourceResult<TRequest extends Request> = [
-  RequestState<TRequest> & { cancel: Canceler },
-  RequestDispatcher<TRequest>,
+export type UseResourceResult<T extends Request> = [
+  RequestState<T> & { cancel: Canceler },
+  RequestDispatcher<T>,
   () => Canceler | undefined,
 ];
 
@@ -62,14 +62,14 @@ function getDefaultStateLoading<T extends Request>(
   return undefined;
 }
 
-type Action<T, D = any> =
-  | { type: "success"; data: T; response: AxiosResponse<D> }
-  | { type: "error"; error: RequestError<T, D> }
+type Action<T extends Request> =
+  | { type: "success"; data: Payload<T, true>; response: Payload<T> }
+  | { type: "error"; error: RequestError<Payload<T>, BodyData<T>> }
   | { type: "reset" | "start" };
 
 function getNextState<TRequest extends Request>(
   state: RequestState<TRequest>,
-  action: Action<Payload<TRequest>, BodyData<TRequest>>,
+  action: Action<TRequest>,
 ): RequestState<TRequest> {
   const response = action.type === "success" ? action.response : state.response;
 
@@ -134,9 +134,10 @@ export function useResource<T extends Request>(
     );
   }, [RequestConfig.cacheKey, fnOptions, options?.cacheKey, requestCache]);
   const cacheData = useMemo(() => {
-    return requestCache && cacheKey && typeof requestCache.get === "function"
-      ? requestCache.get(cacheKey) ?? undefined
-      : undefined;
+    if (requestCache && cacheKey && typeof requestCache.get === "function") {
+      return (requestCache.get(cacheKey) as Payload<T, true>) ?? undefined;
+    }
+    return undefined;
   }, [cacheKey, requestCache]);
 
   const [createRequest, { clear }] = useRequest(fn, {

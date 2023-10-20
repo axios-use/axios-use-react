@@ -4,7 +4,6 @@ import type {
   CancelTokenSource,
   Canceler,
   CancelToken,
-  AxiosResponse,
   AxiosInstance,
 } from "axios";
 import axios from "axios";
@@ -14,6 +13,7 @@ import type {
   Request,
   Payload,
   BodyData,
+  RequestError,
 } from "./request";
 import { createRequestError } from "./request";
 import { RequestContext } from "./requestContext";
@@ -72,11 +72,14 @@ export function useRequest<T extends Request>(
           setSources((prevSources) => [...prevSources, source]);
         }
         return axiosInstance({ ...config, cancelToken: source.token })
-          .then((response: AxiosResponse<Payload<T>, BodyData<T>>) => {
+          .then((response) => {
             removeCancelToken(source.token);
 
-            onCompletedRef.current?.(response.data, response);
-            return [response.data, response];
+            onCompletedRef.current?.(
+              response.data as Payload<T, true>,
+              response as Payload<T>,
+            );
+            return [response.data, response as Payload<T>] as const;
           })
           .catch((err: AxiosError<Payload<T>, BodyData<T>>) => {
             removeCancelToken(source.token);
@@ -85,10 +88,12 @@ export function useRequest<T extends Request>(
               ? customCreateReqError(err)
               : createRequestError(err);
 
-            onErrorRef.current?.(error);
+            onErrorRef.current?.(
+              error as RequestError<Payload<T>, BodyData<T>>,
+            );
 
             throw error;
-          }) as Promise<[Payload<T>, AxiosResponse<BodyData<T>>]>;
+          });
       };
 
       return {
