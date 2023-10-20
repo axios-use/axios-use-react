@@ -71,8 +71,10 @@ describe("useRequest", () => {
       useRequest(() => ({ url: "/users", method: "GET" })),
     );
 
-    void act(() => {
-      void result.current[0]().ready();
+    act(() => {
+      result.current[0]()
+        .ready()
+        .catch(() => undefined);
       expect(result.current[1].hasPending).toBeFalsy();
     });
 
@@ -80,13 +82,13 @@ describe("useRequest", () => {
     expect(result.current[1].hasPending).toBeTruthy();
   });
 
-  it("clear", async () => {
-    const { result, unmount, waitForNextUpdate } = renderHook(() =>
+  it("clear", () => {
+    const { result, unmount } = renderHook(() =>
       useRequest(() => ({ url: "/users", method: "GET" })),
     );
 
-    void act(() => {
-      void result.current[0]()
+    act(() => {
+      result.current[0]()
         .ready()
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -94,20 +96,19 @@ describe("useRequest", () => {
         });
     });
 
-    void act(() => {
-      void result.current[0]()
+    act(() => {
+      result.current[0]()
         .ready()
         .then((r) => {
           expect(r[0]).toStrictEqual(okResponse);
-        });
+        })
+        .catch(() => undefined);
 
       result.current[1].clear("clear-messgae");
     });
 
-    await waitForNextUpdate();
-
-    void act(() => {
-      void result.current[0]()
+    act(() => {
+      result.current[0]()
         .ready()
         .catch((e) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -117,12 +118,13 @@ describe("useRequest", () => {
 
     unmount();
 
-    void act(() => {
-      void result.current[0]()
+    act(() => {
+      result.current[0]()
         .ready()
         .then((r) => {
           expect(r[0]).toStrictEqual(okResponse);
-        });
+        })
+        .catch(() => undefined);
 
       result.current[1].clear("unmount-messgae");
     });

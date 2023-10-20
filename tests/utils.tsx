@@ -3,8 +3,8 @@ import React from "react";
 import type { FC, PropsWithChildren } from "react";
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
-import type { RenderHookOptions } from "@testing-library/react-hooks";
-import { renderHook } from "@testing-library/react-hooks";
+import type { RenderHookOptions } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 
 import type { RequestContextConfig } from "../src";
 import { RequestProvider } from "../src";
@@ -22,13 +22,13 @@ const AllTheProviders: FC<
   </RequestProvider>
 );
 
-function customRenderHook<P, R>(
+function customRenderHook<R, P>(
   callback: (props: P) => R,
   options?: RenderHookOptions<P> & RequestContextConfig,
 ) {
   const { cache, cacheKey, cacheFilter, customCreateReqError, ...rest } =
     options || {};
-  return renderHook<P, R>(callback, {
+  return renderHook<R, P>(callback, {
     // eslint-disable-next-line react/display-name
     wrapper: (props) => (
       <AllTheProviders
@@ -43,7 +43,7 @@ function customRenderHook<P, R>(
   });
 }
 
-export * from "@testing-library/react-hooks";
+export * from "@testing-library/react";
 
 type Equal<Left, Right> = [Left] extends [Right]
   ? [Right] extends [Left]

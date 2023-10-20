@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react-hooks";
+import { renderHook } from "@testing-library/react";
 import { useEffect } from "react";
 
 import { useMountedState, useDeepMemo, useRefFn, getStrByFn } from "../src";
@@ -75,21 +75,16 @@ describe("useRefFn", () => {
     const fn01 = (num: number) => num;
     const fn02 = (num: number) => num + 1;
 
-    const { result, rerender } = renderHook(
-      (props) => {
-        const ref = useRefFn(props);
+    const { result, rerender } = renderHook((props: typeof fn01 = fn01) => {
+      const ref = useRefFn(props);
 
-        useEffect(() => {
-          fn();
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [ref]);
+      useEffect(() => {
+        fn();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [ref]);
 
-        return ref;
-      },
-      {
-        initialProps: fn01,
-      },
-    );
+      return ref;
+    });
 
     expect(fn).toHaveBeenCalledTimes(1);
 

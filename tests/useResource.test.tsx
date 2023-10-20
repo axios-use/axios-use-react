@@ -1,3 +1,4 @@
+import type { PropsWithChildren } from "react";
 import React from "react";
 import {
   renderHook,
@@ -6,6 +7,7 @@ import {
   act,
   cache,
   axios,
+  waitFor,
 } from "./utils";
 
 import type { Resource, RequestContextConfig } from "../src";
@@ -38,7 +40,7 @@ describe("useResource", () => {
   });
 
   it("response success", async () => {
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useResource(() => ({ url: "/users", method: "GET" })),
     );
 
@@ -47,7 +49,7 @@ describe("useResource", () => {
     expect(result.current[0].response).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
@@ -57,6 +59,7 @@ describe("useResource", () => {
     expect(result.current[0].other).toBeUndefined();
 
     await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
       expect(result.current[0].error).toBeUndefined();
       expect(result.current[0].data).toStrictEqual(okResponse);
       expect(result.current[0].response?.data).toStrictEqual(okResponse);
@@ -66,14 +69,14 @@ describe("useResource", () => {
   });
 
   it("response error", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useResource(() => ({ url: "/400", method: "GET" })),
     );
 
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
@@ -81,15 +84,17 @@ describe("useResource", () => {
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
-    await waitForNextUpdate();
-    expect(result.current[0].data).toBeUndefined();
-    expect(result.current[0].other).toBeUndefined();
-    expect(result.current[0].error?.code).toBe(errResponse.code);
-    expect(result.current[0].error?.data).toStrictEqual(errResponse);
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toBeUndefined();
+      expect(result.current[0].other).toBeUndefined();
+      expect(result.current[0].error?.code).toBe(errResponse.code);
+      expect(result.current[0].error?.data).toStrictEqual(errResponse);
+    });
   });
 
   it("dep request", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useResource((...args: number[]) => ({
         url: "/params",
         method: "GET",
@@ -100,7 +105,7 @@ describe("useResource", () => {
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1](1, 2);
       result.current[1](3, 4);
       result.current[1](5, 6);
@@ -109,10 +114,10 @@ describe("useResource", () => {
     expect(result.current[0].isLoading).toBeTruthy();
     expect(result.current[0].data).toBeUndefined();
 
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([5, 6]);
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([5, 6]);
+    });
   });
 
   it("unmount", () => {
@@ -125,37 +130,36 @@ describe("useResource", () => {
     expect(result.current[0].error).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
     unmount();
   });
 
-  it("clear", async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
+  it("clear", () => {
+    const { result, unmount } = renderHook(() =>
       useResource(() => ({ url: "/users", method: "GET" })),
     );
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
     expect(result.current[0].isLoading).toBeTruthy();
 
-    void act(() => {
+    act(() => {
       result.current[0].cancel();
     });
 
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].error).toBeUndefined();
-
-    await waitForNextUpdate();
+    unmount();
   });
 
   it("requestParams", async () => {
-    const { result, rerender, unmount, waitForNextUpdate } = renderHook(
+    const { result, rerender, unmount } = renderHook(
       (props: number[]) =>
         useResource(
           (...args: number[]) => ({
@@ -174,24 +178,24 @@ describe("useResource", () => {
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].error).toBeUndefined();
 
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([1]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([1]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     rerender([1, 2]);
     expect(result.current[0].isLoading).toBeTruthy();
     expect(result.current[0].data).toStrictEqual([1]);
     expect(result.current[0].error).toBeUndefined();
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([1, 2]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([1, 2]);
-    expect(result.current[0].error).toBeUndefined();
-
-    void act(() => {
+    act(() => {
       result.current[1](3);
     });
 
@@ -199,11 +203,11 @@ describe("useResource", () => {
     expect(result.current[0].data).toStrictEqual([1, 2]);
     expect(result.current[0].error).toBeUndefined();
 
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([3]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([3]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     rerender([5, 6]);
     expect(result.current[0].isLoading).toBeTruthy();
@@ -212,10 +216,14 @@ describe("useResource", () => {
 
     unmount();
     expect(result.current[0].data).toStrictEqual([3]);
+
+    await waitFor(() => {
+      expect(result.current[0].data).toStrictEqual([3]);
+    });
   });
 
   it("options: filter", async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(
+    const { result, rerender } = renderHook(
       (props: number[]) =>
         useResource(
           (...args: number[]) => ({
@@ -237,29 +245,29 @@ describe("useResource", () => {
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].error).toBeUndefined();
 
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([1]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([1]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     rerender([1, 2]);
     expect(result.current[0].isLoading).toBeTruthy();
     expect(result.current[0].data).toStrictEqual([1]);
     expect(result.current[0].error).toBeUndefined();
 
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([1, 2]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([1, 2]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     rerender([2, 2]);
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toStrictEqual([1, 2]);
     expect(result.current[0].error).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1](3, 3);
     });
 
@@ -267,11 +275,11 @@ describe("useResource", () => {
     expect(result.current[0].data).toStrictEqual([1, 2]);
     expect(result.current[0].error).toBeUndefined();
 
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([3, 3]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([3, 3]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     const hook02 = renderHook(
       (props: number[]) =>
@@ -295,21 +303,20 @@ describe("useResource", () => {
   });
 
   it("options: defaultState", async () => {
-    const { result, rerender, waitForNextUpdate } = renderHook(
-      (props: number[]) =>
-        useResource(
-          (...args: number[]) => ({
-            url: "/params",
-            method: "GET",
-            params: args,
-          }),
-          props,
-          {
-            defaultState: {
-              data: [1, 2, 3],
-            },
+    const { result, rerender } = renderHook((props: number[]) =>
+      useResource(
+        (...args: number[]) => ({
+          url: "/params",
+          method: "GET",
+          params: args,
+        }),
+        props,
+        {
+          defaultState: {
+            data: [1, 2, 3],
           },
-        ),
+        },
+      ),
     );
 
     expect(result.current[0].isLoading).toBeFalsy();
@@ -321,27 +328,30 @@ describe("useResource", () => {
     expect(result.current[0].data).toStrictEqual([1, 2, 3]);
     expect(result.current[0].error).toBeUndefined();
 
-    await waitForNextUpdate();
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([3, 4]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([3, 4]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
-    void act(() => {
+    act(() => {
       result.current[1](5, 6);
     });
     expect(result.current[0].isLoading).toBeTruthy();
     expect(result.current[0].data).toStrictEqual([3, 4]);
     expect(result.current[0].error).toBeUndefined();
-    await waitForNextUpdate();
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([5, 6]);
-    expect(result.current[0].error).toBeUndefined();
+
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([5, 6]);
+      expect(result.current[0].error).toBeUndefined();
+    });
   });
 
   it("options: onCompleted", async () => {
     const onCompleted = jest.fn();
     const onError = jest.fn();
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useResource(() => ({ url: "/users", method: "GET" }), false, {
         onCompleted,
         onError,
@@ -352,7 +362,7 @@ describe("useResource", () => {
     expect(onCompleted).toHaveBeenCalledTimes(0);
     expect(onError).toHaveBeenCalledTimes(0);
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
@@ -360,21 +370,22 @@ describe("useResource", () => {
     expect(onCompleted).toHaveBeenCalledTimes(0);
     expect(onError).toHaveBeenCalledTimes(0);
 
-    await waitForNextUpdate();
-    expect(result.current[0].data).toStrictEqual(okResponse);
+    await waitFor(() => {
+      expect(result.current[0].data).toStrictEqual(okResponse);
 
-    expect(onCompleted).toHaveBeenCalledTimes(1);
-    expect(onCompleted).toHaveBeenCalledWith(
-      result.current[0].data,
-      result.current[0].other,
-    );
-    expect(onError).toHaveBeenCalledTimes(0);
+      expect(onCompleted).toHaveBeenCalledTimes(1);
+      expect(onCompleted).toHaveBeenCalledWith(
+        result.current[0].data,
+        result.current[0].other,
+      );
+      expect(onError).toHaveBeenCalledTimes(0);
+    });
   });
 
   it("options: onError", async () => {
     const onCompleted = jest.fn();
     const onError = jest.fn();
-    const { result, waitForNextUpdate } = renderHook(() =>
+    const { result } = renderHook(() =>
       useResource(() => ({ url: "/400", method: "GET" }), undefined, {
         onCompleted,
         onError,
@@ -385,7 +396,7 @@ describe("useResource", () => {
     expect(onCompleted).toHaveBeenCalledTimes(0);
     expect(onError).toHaveBeenCalledTimes(0);
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
@@ -393,15 +404,16 @@ describe("useResource", () => {
     expect(onCompleted).toHaveBeenCalledTimes(0);
     expect(onError).toHaveBeenCalledTimes(0);
 
-    await waitForNextUpdate();
-    expect(result.current[0].data).toBeUndefined();
-    expect(result.current[0].response).toBeUndefined();
-    expect(result.current[0].other).toBeUndefined();
-    expect(result.current[0].error?.code).toBe(errResponse.code);
-    expect(result.current[0].error?.data).toStrictEqual(errResponse);
-    expect(onCompleted).toHaveBeenCalledTimes(0);
-    expect(onError).toHaveBeenCalledTimes(1);
-    expect(onError).toHaveBeenCalledWith(result.current[0].error);
+    await waitFor(() => {
+      expect(result.current[0].data).toBeUndefined();
+      expect(result.current[0].response).toBeUndefined();
+      expect(result.current[0].other).toBeUndefined();
+      expect(result.current[0].error?.code).toBe(errResponse.code);
+      expect(result.current[0].error?.data).toStrictEqual(errResponse);
+      expect(onCompleted).toHaveBeenCalledTimes(0);
+      expect(onError).toHaveBeenCalledTimes(1);
+      expect(onError).toHaveBeenCalledWith(result.current[0].error);
+    });
   });
 });
 
@@ -418,7 +430,7 @@ describe("useResource - cache", () => {
   });
 
   it("cache response", async () => {
-    const { result, waitForNextUpdate, unmount } = renderHook(() =>
+    const { result, unmount } = renderHook(() =>
       useResource(() => ({
         url: "/get",
         method: "GET",
@@ -429,14 +441,14 @@ describe("useResource - cache", () => {
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].error).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([1, 2]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([1, 2]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     unmount();
 
@@ -453,7 +465,7 @@ describe("useResource - cache", () => {
 
     rtnData = [3, 4];
 
-    void act(() => {
+    act(() => {
       req01.result.current[1]();
     });
 
@@ -461,15 +473,15 @@ describe("useResource - cache", () => {
     expect(req01.result.current[0].data).toStrictEqual([1, 2]);
     expect(req01.result.current[0].error).toBeUndefined();
 
-    await req01.waitForNextUpdate();
-
-    expect(req01.result.current[0].isLoading).toBeFalsy();
-    expect(req01.result.current[0].data).toStrictEqual([3, 4]);
-    expect(req01.result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(req01.result.current[0].isLoading).toBeFalsy();
+      expect(req01.result.current[0].data).toStrictEqual([3, 4]);
+      expect(req01.result.current[0].error).toBeUndefined();
+    });
   });
 
   it("cache default filter", async () => {
-    const { result, waitForNextUpdate, unmount } = renderHook(() =>
+    const { result, unmount } = renderHook(() =>
       useResource(() => ({
         url: "/post",
         method: "POST",
@@ -480,14 +492,15 @@ describe("useResource - cache", () => {
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].error).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
-    await waitForNextUpdate();
 
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toBeTruthy();
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toBeTruthy();
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     unmount();
 
@@ -504,7 +517,7 @@ describe("useResource - cache", () => {
 
     rtnData = [3, 4];
 
-    void act(() => {
+    act(() => {
       req01.result.current[1]();
     });
 
@@ -512,17 +525,17 @@ describe("useResource - cache", () => {
     expect(req01.result.current[0].data).toBeUndefined();
     expect(req01.result.current[0].error).toBeUndefined();
 
-    await req01.waitForNextUpdate();
-
-    expect(req01.result.current[0].isLoading).toBeFalsy();
-    expect(req01.result.current[0].data).toBeTruthy();
-    expect(req01.result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(req01.result.current[0].isLoading).toBeFalsy();
+      expect(req01.result.current[0].data).toBeTruthy();
+      expect(req01.result.current[0].error).toBeUndefined();
+    });
   });
 
   it("cache custom filter", async () => {
     const mycache = wrapCache(new Map());
     const commonKey = "demo-post-key";
-    const { result, waitForNextUpdate } = originalRenderHook(
+    const { result } = originalRenderHook(
       () =>
         useResource(
           () => ({
@@ -534,8 +547,7 @@ describe("useResource - cache", () => {
           { cacheKey: commonKey },
         ),
       {
-        // eslint-disable-next-line react/display-name
-        wrapper: (props: RequestContextConfig) => (
+        wrapper: (props: PropsWithChildren<RequestContextConfig>) => (
           <RequestProvider
             instance={axios}
             cache={mycache}
@@ -546,11 +558,12 @@ describe("useResource - cache", () => {
       },
     );
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
-    await waitForNextUpdate();
-    expect(result.current[0].data).toBeTruthy();
+    await waitFor(() => {
+      expect(result.current[0].data).toBeTruthy();
+    });
 
     const req01 = originalRenderHook(
       () =>
@@ -564,8 +577,7 @@ describe("useResource - cache", () => {
           { cacheKey: commonKey },
         ),
       {
-        // eslint-disable-next-line react/display-name
-        wrapper: (props: RequestContextConfig) => (
+        wrapper: (props: PropsWithChildren<RequestContextConfig>) => (
           <RequestProvider
             instance={axios}
             cache={mycache}
@@ -579,14 +591,15 @@ describe("useResource - cache", () => {
     expect(req01.result.current[0].data).toBeFalsy();
     expect(req01.result.current[0].error).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       req01.result.current[1]();
     });
-    await req01.waitForNextUpdate();
 
-    expect(req01.result.current[0].isLoading).toBeFalsy();
-    expect(req01.result.current[0].data).toBeTruthy();
-    expect(req01.result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(req01.result.current[0].isLoading).toBeFalsy();
+      expect(req01.result.current[0].data).toBeTruthy();
+      expect(req01.result.current[0].error).toBeUndefined();
+    });
 
     const req02 = originalRenderHook(
       () =>
@@ -600,8 +613,7 @@ describe("useResource - cache", () => {
           { cacheKey: commonKey },
         ),
       {
-        // eslint-disable-next-line react/display-name
-        wrapper: (props: RequestContextConfig) => (
+        wrapper: (props: PropsWithChildren<RequestContextConfig>) => (
           <RequestProvider
             instance={axios}
             cache={mycache}
@@ -615,14 +627,15 @@ describe("useResource - cache", () => {
     expect(req02.result.current[0].data).toBeTruthy();
     expect(req02.result.current[0].error).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       req02.result.current[1]();
     });
-    await req02.waitForNextUpdate();
 
-    expect(req02.result.current[0].isLoading).toBeFalsy();
-    expect(req02.result.current[0].data).toBeTruthy();
-    expect(req02.result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(req02.result.current[0].isLoading).toBeFalsy();
+      expect(req02.result.current[0].data).toBeTruthy();
+      expect(req02.result.current[0].error).toBeUndefined();
+    });
   });
 
   it("cacheKey", async () => {
@@ -634,51 +647,51 @@ describe("useResource - cache", () => {
       method: "GET",
     };
 
-    const { result, waitForNextUpdate } = originalRenderHook(
-      () => useResource(() => reqConfig),
-      {
-        // eslint-disable-next-line react/display-name
-        wrapper: (props: RequestContextConfig) => (
-          <RequestProvider instance={axios} cache={mycache} {...props} />
-        ),
-      },
-    );
+    const { result } = originalRenderHook(() => useResource(() => reqConfig), {
+      wrapper: (props: PropsWithChildren<RequestContextConfig>) => (
+        <RequestProvider instance={axios} cache={mycache} {...props} />
+      ),
+    });
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
-    await waitForNextUpdate();
-    expect(result.current[0].data).toStrictEqual(rtnData);
-    expect(mycache.get(defaultCacheKeyGenerator(reqConfig))).toStrictEqual(
-      rtnData,
-    );
+    await waitFor(() => {
+      expect(result.current[0].data).toStrictEqual(rtnData);
+      expect(mycache.get(defaultCacheKeyGenerator(reqConfig))).toStrictEqual(
+        rtnData,
+      );
+    });
 
     const customKey = () => "demoKey";
     const req01 = originalRenderHook(
       () => useResource(() => reqConfig, undefined, { cacheKey: customKey }),
       {
         // eslint-disable-next-line react/display-name
-        wrapper: (props: RequestContextConfig) => (
+        wrapper: (props: PropsWithChildren<RequestContextConfig>) => (
           <RequestProvider instance={axios} cache={mycache} {...props} />
         ),
       },
     );
 
-    void act(() => {
+    act(() => {
       req01.result.current[1]();
     });
 
-    await req01.waitForNextUpdate();
-    expect(result.current[0].data).toStrictEqual(rtnData);
-    expect(mycache.get(customKey())).toStrictEqual(rtnData);
-    expect(customKey()).not.toStrictEqual(defaultCacheKeyGenerator(reqConfig));
+    await waitFor(() => {
+      expect(result.current[0].data).toStrictEqual(rtnData);
+      expect(mycache.get(customKey())).toStrictEqual(rtnData);
+      expect(customKey()).not.toStrictEqual(
+        defaultCacheKeyGenerator(reqConfig),
+      );
+    });
   });
 
   it("close cache", async () => {
     rtnData = [5, 6];
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useResource(() => ({
           url: "/get",
@@ -693,14 +706,14 @@ describe("useResource - cache", () => {
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].error).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
-    await waitForNextUpdate();
-
-    expect(result.current[0].isLoading).toBeFalsy();
-    expect(result.current[0].data).toStrictEqual([5, 6]);
-    expect(result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].data).toStrictEqual([5, 6]);
+      expect(result.current[0].error).toBeUndefined();
+    });
 
     const req01 = renderHook(() =>
       useResource(
@@ -719,7 +732,7 @@ describe("useResource - cache", () => {
 
     rtnData = [7, 8];
 
-    void act(() => {
+    act(() => {
       req01.result.current[1]();
     });
 
@@ -727,11 +740,11 @@ describe("useResource - cache", () => {
     expect(req01.result.current[0].data).toBeUndefined();
     expect(req01.result.current[0].error).toBeUndefined();
 
-    await req01.waitForNextUpdate();
-
-    expect(req01.result.current[0].isLoading).toBeFalsy();
-    expect(req01.result.current[0].data).toStrictEqual([7, 8]);
-    expect(req01.result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(req01.result.current[0].isLoading).toBeFalsy();
+      expect(req01.result.current[0].data).toStrictEqual([7, 8]);
+      expect(req01.result.current[0].error).toBeUndefined();
+    });
 
     const req02 = renderHook(
       () =>
@@ -750,7 +763,7 @@ describe("useResource - cache", () => {
 
     rtnData = [9, 10];
 
-    void act(() => {
+    act(() => {
       req02.result.current[1]();
     });
 
@@ -758,11 +771,11 @@ describe("useResource - cache", () => {
     expect(req02.result.current[0].data).toBeUndefined();
     expect(req02.result.current[0].error).toBeUndefined();
 
-    await req02.waitForNextUpdate();
-
-    expect(req02.result.current[0].isLoading).toBeFalsy();
-    expect(req02.result.current[0].data).toStrictEqual([9, 10]);
-    expect(req02.result.current[0].error).toBeUndefined();
+    await waitFor(() => {
+      expect(req02.result.current[0].isLoading).toBeFalsy();
+      expect(req02.result.current[0].data).toStrictEqual([9, 10]);
+      expect(req02.result.current[0].error).toBeUndefined();
+    });
   });
 });
 
@@ -782,7 +795,7 @@ describe("useResource - custom instance", () => {
         xxxkey: "use-request",
       },
     });
-    const { result, waitFor } = renderHook(() =>
+    const { result } = renderHook(() =>
       useResource(() => ({ url: "/users", method: "GET" }), undefined, {
         instance,
       }),
@@ -793,7 +806,7 @@ describe("useResource - custom instance", () => {
     expect(result.current[0].response).toBeUndefined();
     expect(result.current[0].other).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]();
     });
 
@@ -833,7 +846,7 @@ describe("useResource - check types", () => {
   });
 
   it("check types & refresh func", async () => {
-    const { result, waitFor, rerender } = renderHook((id: string) =>
+    const { result, rerender } = renderHook((id: string) =>
       useResource(getUserReqConfig, [id], {
         filter: (p) => !!p,
       }),
@@ -843,7 +856,7 @@ describe("useResource - check types", () => {
     expect(result.current[0].response).toBeUndefined();
     expect(callTimesFn).toHaveBeenCalledTimes(0);
 
-    void act(() => {
+    act(() => {
       result.current[1]("001");
     });
 
@@ -860,7 +873,7 @@ describe("useResource - check types", () => {
       expect(callTimesFn).toHaveBeenCalledTimes(1);
     });
 
-    void act(() => {
+    act(() => {
       result.current[2]();
     });
 
@@ -881,7 +894,7 @@ describe("useResource - check types", () => {
       expect(callTimesFn).toHaveBeenCalledTimes(2);
     });
 
-    void act(() => {
+    act(() => {
       result.current[2]();
     });
     expect(result.current[0].isLoading).toBeTruthy();
@@ -905,13 +918,13 @@ describe("useResource - check types", () => {
       });
     };
 
-    const { result, waitFor } = renderHook(() => useResource(getUserInfo));
+    const { result } = renderHook(() => useResource(getUserInfo));
 
     expect(result.current[0].isLoading).toBeFalsy();
     expect(result.current[0].data).toBeUndefined();
     expect(result.current[0].response).toBeUndefined();
 
-    void act(() => {
+    act(() => {
       result.current[1]({ id: "001" });
     });
 
