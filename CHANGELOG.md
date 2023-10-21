@@ -1,3 +1,12 @@
+## [6.5.0](https://github.com/axios-use/react/compare/v6.4.2...v6.5.0) (2023-10-21)
+
+
+### Features
+
+* **request:** export `_request` to custom response type ([#21](https://github.com/axios-use/axios-use-react/pull/21))
+
+
+
 ## [6.4.2](https://github.com/axios-use/react/compare/v6.4.1...v6.4.2) (2023-05-04)
 
 
