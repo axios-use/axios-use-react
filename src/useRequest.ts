@@ -23,6 +23,8 @@ import { useMountedState, useRefFn } from "./utils";
 export type UseRequestOptions<TRequest extends Request> =
   RequestCallbackFn<TRequest> & {
     instance?: AxiosInstance;
+    /** custom returns the value of `data`. @default (r) => r?.data */
+    getResponseItem?: (res?: any) => unknown;
   };
 
 export type UseRequestResult<TRequest extends Request> = [
@@ -75,11 +77,14 @@ export function useRequest<T extends Request>(
           .then((response) => {
             removeCancelToken(source.token);
 
-            onCompletedRef.current?.(
-              response.data as Payload<T, true>,
-              response as Payload<T>,
-            );
-            return [response.data, response as Payload<T>] as const;
+            const _data = (
+              options?.getResponseItem
+                ? options.getResponseItem(response as Payload<T>)
+                : RequestConfig.getResponseItem?.(response)
+            ) as Payload<T, true>;
+
+            onCompletedRef.current?.(_data, response as Payload<T>);
+            return [_data, response as Payload<T>] as const;
           })
           .catch((err: AxiosError<Payload<T>, BodyData<T>>) => {
             removeCancelToken(source.token);

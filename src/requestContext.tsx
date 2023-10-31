@@ -1,6 +1,6 @@
 import React, { createContext, useMemo } from "react";
 import type { PropsWithChildren } from "react";
-import type { AxiosInstance } from "axios";
+import type { AxiosInstance, AxiosResponse } from "axios";
 
 import type { RequestError } from "./request";
 import type { Cache, CacheKeyFn, CacheFilter } from "./cache";
@@ -13,6 +13,8 @@ export type RequestContextConfig<T = any, E = any> = {
   cacheKey?: CacheKeyFn<T>;
   cacheFilter?: CacheFilter<T>;
   customCreateReqError?: (err: any) => RequestError<T, any, E>;
+  /** custom `data` value. @default response['data'] */
+  getResponseItem?: (res?: any) => unknown;
 };
 
 export type RequestContextValue<T = any, E = any> = RequestContextConfig<T, E>;
@@ -22,6 +24,8 @@ const cache = wrapCache(_ttlcache);
 const defaultConfig: RequestContextConfig = {
   cache,
   cacheKey: defaultCacheKeyGenerator,
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  getResponseItem: (res: AxiosResponse) => res?.data,
 };
 
 export const RequestContext = createContext<RequestContextValue>(defaultConfig);
@@ -37,12 +41,27 @@ export const RequestProvider = <T,>(
     cacheKey,
     cacheFilter,
     customCreateReqError,
+    getResponseItem,
     ...rest
   } = props;
 
   const providerValue = useMemo(
-    () => ({ instance, cache, cacheKey, cacheFilter, customCreateReqError }),
-    [cache, cacheFilter, cacheKey, customCreateReqError, instance],
+    () => ({
+      instance,
+      cache,
+      cacheKey,
+      cacheFilter,
+      customCreateReqError,
+      getResponseItem,
+    }),
+    [
+      cache,
+      cacheFilter,
+      cacheKey,
+      customCreateReqError,
+      getResponseItem,
+      instance,
+    ],
   );
 
   return (

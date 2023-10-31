@@ -40,7 +40,7 @@ export type UseResourceResult<T extends Request> = [
 
 export type UseResourceOptions<T extends Request> = Pick<
   RequestContextConfig<Payload<T>>,
-  "cache" | "cacheFilter" | "instance"
+  "cache" | "cacheFilter" | "instance" | "getResponseItem"
 > &
   RequestCallbackFn<T> & {
     cacheKey?: CacheKey | CacheKeyFn<T>;
@@ -145,6 +145,7 @@ export function useResource<T extends Request>(
     onCompleted: options?.onCompleted,
     onError: options?.onError,
     instance: options?.instance,
+    getResponseItem: options?.getResponseItem,
   });
   const [state, dispatch] = useReducer(getNextState, {
     data: cacheData ?? undefined,
