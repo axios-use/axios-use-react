@@ -415,6 +415,95 @@ describe("useResource", () => {
       expect(onError).toHaveBeenCalledWith(result.current[0].error);
     });
   });
+
+  it("options: getResponseItem", async () => {
+    const { result } = renderHook(() =>
+      useResource(() => ({ url: "/users", method: "GET" }), false, {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        getResponseItem: (r) => r?.data?.data,
+      }),
+    );
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+
+    act(() => {
+      result.current[1]();
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].error).toBeUndefined();
+      // custom data
+      expect(result.current[0].data).toStrictEqual(okResponse.data);
+      expect(result.current[0].response?.data).toStrictEqual(okResponse);
+      expect(result.current[0].response?.status).toBe(200);
+    });
+  });
+  it("axios config: transformResponse", async () => {
+    const { result: result01 } = renderHook(() =>
+      useResource(() => ({
+        url: "/users",
+        method: "GET",
+        transformResponse: () => null,
+      })),
+    );
+    expect(result01.current[0].isLoading).toBeFalsy();
+    expect(result01.current[0].data).toBeUndefined();
+    expect(result01.current[0].response).toBeUndefined();
+
+    act(() => {
+      result01.current[1]();
+    });
+    await waitFor(() => {
+      expect(result01.current[0].isLoading).toBeFalsy();
+      expect(result01.current[0].error).toBeUndefined();
+      // transformResponse undefined
+      expect(result01.current[0].data).toBeNull();
+      expect(result01.current[0].response?.data).toBeNull();
+      expect(result01.current[0].response?.status).toBe(200);
+    });
+  });
+
+  it("context: getResponseItem", async () => {
+    const { result } = originalRenderHook(
+      () => useResource(() => ({ url: "/users", method: "get" })),
+      {
+        wrapper: (props: PropsWithChildren<RequestContextConfig>) => (
+          <RequestProvider
+            instance={axios}
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            getResponseItem={(r) => r?.data?.data}
+            {...props}
+          />
+        ),
+      },
+    );
+    expect(result.current[0].isLoading).toBeFalsy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+
+    act(() => {
+      result.current[1]();
+    });
+
+    expect(result.current[0].isLoading).toBeTruthy();
+    expect(result.current[0].data).toBeUndefined();
+    expect(result.current[0].response).toBeUndefined();
+
+    await waitFor(() => {
+      expect(result.current[0].isLoading).toBeFalsy();
+      expect(result.current[0].error).toBeUndefined();
+      // custom data
+      expect(result.current[0].data).toStrictEqual(okResponse.data);
+      expect(result.current[0].response?.data).toStrictEqual(okResponse);
+      expect(result.current[0].response?.status).toBe(200);
+    });
+  });
 });
 
 describe("useResource - cache", () => {
