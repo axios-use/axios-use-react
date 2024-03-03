@@ -71,13 +71,14 @@ ReactDOM.render(
 
 #### RequestProvider config
 
-| config               | type            | explain                                                    |
-| -------------------- | --------------- | ---------------------------------------------------------- |
-| instance             | object          | axios instance                                             |
-| cache                | object \| false | Customized cache collections. Or close. (**Default on**)   |
-| cacheKey             | function        | Global custom formatted cache keys                         |
-| cacheFilter          | function        | Global callback function to decide whether to cache or not |
-| customCreateReqError | function        | Custom format error data                                   |
+| config               | type            | default                  | explain                                                     |
+| -------------------- | --------------- | ------------------------ | ----------------------------------------------------------- |
+| instance             | object          | axios                    | axios instance                                              |
+| cache                | object \| false | \_ttlcache               | Customized cache collections. Or close. (**Default on**)    |
+| cacheKey             | function        | defaultCacheKeyGenerator | Global custom formatted cache keys                          |
+| cacheFilter          | function        | -                        | Global callback function to decide whether to cache or not  |
+| customCreateReqError | function        | -                        | Custom format error data                                    |
+| getResponseItem      | function        | `(r) => r.data`          | custom `data` value. The default value is response['data']. |
 
 ### useRequest
 
