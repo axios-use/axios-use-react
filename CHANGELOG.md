@@ -1,3 +1,12 @@
+## [6.6.0](https://github.com/axios-use/react/compare/v6.5.0...v6.6.0) (2024-03-10)
+
+
+### Features
+
+* **useRequest:** `getResponseItem` option ([#22](https://github.com/axios-use/axios-use-react/pull/22))
+
+
+
 ## [6.5.0](https://github.com/axios-use/react/compare/v6.4.2...v6.5.0) (2023-10-21)
 
 
